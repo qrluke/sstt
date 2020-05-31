@@ -248,19 +248,19 @@ void CheckKey(string key)
 		}
 		pSAMP->AddChatMessage(-1, "[SSTT]: Recording Finished");
 		StopRecording();
-		pSAMP->AddChatMessage(-1, "[SSTT]: Saving...");
+		//pSAMP->AddChatMessage(-1, "[SSTT]: Saving...");
 		WriteToDisk();
-		pSAMP->AddChatMessage(-1, "[SSTT]: Saved!");
-		pSAMP->AddChatMessage(-1, "[SSTT]: Recognizion...");
+		//pSAMP->AddChatMessage(-1, "[SSTT]: Saved!");
+		//pSAMP->AddChatMessage(-1, "[SSTT]: Recognizion...");
 		std::string text = recognition("SSTT.wav");
 		if (text == "ERROR")
 		{
-			pSAMP->AddChatMessage(-1, "[SSTT]: ERROR!");
+			pSAMP->AddChatMessage(-1, "[SSTT]: Непредвиденная ошибка :(");
 			return;
 		}
 		if (text == "NOT RECOGNIZED")
 		{
-			pSAMP->AddChatMessage(-1, "[SSTT]: NOT RECOGNIZED!");
+			pSAMP->AddChatMessage(-1, "[SSTT]: Не удалось распознать!");
 			return;
 		}
 
@@ -276,7 +276,7 @@ void CheckKey(string key)
 			text = "/me " + text;
 
 		pSAMP->SendChat(const_cast<char *>(utf2cp(text).c_str()));
-		pSAMP->AddChatMessage(-1, "[SSTT]: Done!");
+		//pSAMP->AddChatMessage(-1, "[SSTT]: Done!");
 	}
 }
 
