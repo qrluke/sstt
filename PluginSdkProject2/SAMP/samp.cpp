@@ -24,7 +24,7 @@ bool SAMP::IsInitialized()
 
 void SAMP::AddChatMessage(D3DCOLOR cColor, char *szMsg)
 {
-	Sleep(100);
+	Sleep(50);
 	if (g_Chat == nullptr)
 		return;
 

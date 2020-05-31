@@ -230,7 +230,7 @@ void CheckKey(string key)
 {
 	if (GetKeyState(key[0]) & 0x8000)
 	{
-		Sleep(350);
+		Sleep(200);
 		if (!(GetKeyState(key[0]) & 0x8000))
 		{
 			return;
@@ -286,6 +286,7 @@ void MainThread()
 
 	while (true)
 	{
+		Sleep(100);
 		if (!initialized)
 		{
 			if (!pSAMP->IsInitialized())
