@@ -230,7 +230,7 @@ void CheckKey(string key)
 {
 	if (GetKeyState(key[0]) & 0x8000)
 	{
-		Sleep(300);
+		Sleep(600);
 		if (!(GetKeyState(key[0]) & 0x8000))
 		{
 			return;
