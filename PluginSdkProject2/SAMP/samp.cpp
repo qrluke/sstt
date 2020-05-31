@@ -43,7 +43,7 @@ void SAMP::AddChatMessage(D3DCOLOR cColor, char *szMsg)
 
 	return AddToChatWindowBuffer((void *)g_Chat, 8, tmp, NULL, cColor, 0x00);
 }
-
+// https://github.com/BlastHackNet/mod_s0beit_sa-1/blob/dc9b3b13599a8b6325e566f567b5391b0b2a6dc8/src/samp.cpp#L734
 void SAMP::SendChat(char *szMsg)
 {
 	if (g_Chat == nullptr)
@@ -59,5 +59,12 @@ void SAMP::SendChat(char *szMsg)
 	vsnprintf(tmp, sizeof(tmp) - 1, szMsg, ap);
 	va_end(ap);
 
-	((void(__thiscall *)(void *_this, char *message))(dwSAMPAddr + SAMP_SENDSAY))(g_Players->pLocalPlayer, tmp);
+	if (tmp[0] == '/')
+	{
+		((void(__thiscall*) (void* _this, char* message)) (dwSAMPAddr + SAMP_SENDCMD))(g_Input, tmp);
+	}
+	else
+	{
+		((void(__thiscall*) (void* _this, char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, tmp);
+	}
 }
