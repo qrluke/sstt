@@ -101,12 +101,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="iconvlite.cpp" />
+    <ClCompile Include="iconvlite\iconvlite.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SAMP\samp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="iconvlite.h" />
+    <ClInclude Include="iconvlite\iconvlite.h" />
     <ClInclude Include="INI.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="SAMP\samp.h" />

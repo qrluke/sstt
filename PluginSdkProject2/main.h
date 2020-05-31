@@ -6,7 +6,7 @@
 
 using namespace plugin;
 
-#include "samp.h"
+#include "SAMP/samp.h"
 
 extern SAMP *pSAMP;
 extern CPed *PEDSELF;
