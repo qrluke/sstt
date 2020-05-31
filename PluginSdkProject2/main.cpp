@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "bass.h"
+#include "audio/bass.h"
 #include "iconvlite/iconvlite.h"
 
 using namespace std;
@@ -18,22 +18,22 @@ using namespace std;
 #define BUFSTEP 200000 // memory allocation unit
 
 int input;			 // current input source
-BYTE* recbuf = NULL; // recording buffer
+BYTE *recbuf = NULL; // recording buffer
 DWORD reclen;		 // recording length
 HRECORD rchan = 0;	 // recording channel
 HSTREAM chan = 0;	 // playback channel
 
-size_t write_response_data(char* ptr, size_t size, size_t nmemb, void* userdata)
+size_t write_response_data(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	stringstream* s = (stringstream*)userdata;
+	stringstream *s = (stringstream *)userdata;
 	size_t n = size * nmemb;
 	s->write(ptr, n);
 	return n;
 }
 
-size_t read_request_data(char* ptr, size_t size, size_t nmemb, void* userdata)
+size_t read_request_data(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	ifstream* f = (ifstream*)userdata;
+	ifstream *f = (ifstream *)userdata;
 	size_t n = size * nmemb;
 	f->read(ptr, n);
 	size_t result = f->gcount();
@@ -42,7 +42,7 @@ size_t read_request_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 
 string recognition(string filename)
 {
-	CURL* curl = NULL;
+	CURL *curl = NULL;
 	curl = curl_easy_init();
 
 	if (curl)
@@ -52,7 +52,7 @@ string recognition(string filename)
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-		struct curl_slist* headers = NULL;
+		struct curl_slist *headers = NULL;
 
 		headers = curl_slist_append(headers, "Content-Type: audio/x-wav");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -85,10 +85,12 @@ string recognition(string filename)
 		myfile << "Http code is " << httpCode << "\n";
 		myfile << contentStream.str() << "\n";
 		myfile.close();
-		if (httpCode == 200) {
+		if (httpCode == 200)
+		{
 			string str = contentStream.str();
 			string s2 = "<recognitionResults success=\"0\" />";
-			if (strstr(str.c_str(), s2.c_str())) {
+			if (strstr(str.c_str(), s2.c_str()))
+			{
 				curl_free(headers);
 				curl_easy_cleanup(curl);
 				return "NOT RECOGNIZED";
@@ -104,7 +106,8 @@ string recognition(string filename)
 			curl_easy_cleanup(curl);
 			return str3;
 		}
-		else {
+		else
+		{
 			curl_free(headers);
 			curl_easy_cleanup(curl);
 			return "ERROR";
@@ -114,19 +117,19 @@ string recognition(string filename)
 }
 
 // display error messages straight into chat
-void Error(const char* es)
+void Error(const char *es)
 {
 	char mes[200];
 	sprintf(mes, "%s\n(error code: %d)", es, BASS_ErrorGetCode());
 	pSAMP->AddChatMessage(-1, mes);
 }
 
-BOOL CALLBACK RecordingCallback(HRECORD handle, const void* buffer, DWORD length, void* user)
+BOOL CALLBACK RecordingCallback(HRECORD handle, const void *buffer, DWORD length, void *user)
 {
 	// increase buffer size if needed
 	if ((reclen % BUFSTEP) + length >= BUFSTEP)
 	{
-		recbuf = (BYTE*)realloc(recbuf, ((reclen + length) / BUFSTEP + 1) * BUFSTEP);
+		recbuf = (BYTE *)realloc(recbuf, ((reclen + length) / BUFSTEP + 1) * BUFSTEP);
 		if (!recbuf)
 		{
 			rchan = 0;
@@ -142,7 +145,7 @@ BOOL CALLBACK RecordingCallback(HRECORD handle, const void* buffer, DWORD length
 
 void StartRecording()
 {
-	WAVEFORMATEX* wf;
+	WAVEFORMATEX *wf;
 	if (recbuf)
 	{ // free old recording
 		BASS_StreamFree(chan);
@@ -151,12 +154,12 @@ void StartRecording()
 		recbuf = NULL;
 	}
 	// allocate initial buffer and make space for WAVE header
-	recbuf = (BYTE*)malloc(BUFSTEP);
+	recbuf = (BYTE *)malloc(BUFSTEP);
 	reclen = 44;
 	// fill the WAVE header
 	memcpy(recbuf, "RIFF\0\0\0\0WAVEfmt \20\0\0\0", 20);
 	memcpy(recbuf + 36, "data\0\0\0\0", 8);
-	wf = (WAVEFORMATEX*)(recbuf + 20);
+	wf = (WAVEFORMATEX *)(recbuf + 20);
 	wf->wFormatTag = 1;
 	wf->nChannels = CHANS;
 	wf->wBitsPerSample = 16;
@@ -179,15 +182,15 @@ void StopRecording()
 	BASS_ChannelStop(rchan);
 	rchan = 0;
 	// complete the WAVE header
-	*(DWORD*)(recbuf + 4) = reclen - 8;
-	*(DWORD*)(recbuf + 40) = reclen - 44;
+	*(DWORD *)(recbuf + 4) = reclen - 8;
+	*(DWORD *)(recbuf + 40) = reclen - 44;
 	// create a stream from the recording
 	chan = BASS_StreamCreateFile(TRUE, recbuf, 0, reclen, 0);
 }
 // write the recorded data to disk
 void WriteToDisk()
 {
-	FILE* fp;
+	FILE *fp;
 	char file[MAX_PATH] = "";
 	if (!(fp = fopen("SSTT.wav", "wb")))
 	{
@@ -210,7 +213,7 @@ BOOL InitDevice(int device)
 	}
 	{ // get list of inputs
 		int c;
-		const char* i;
+		const char *i;
 		input = 0;
 		for (c = 0; i = BASS_RecordGetInputName(c); c++)
 		{
@@ -223,7 +226,8 @@ BOOL InitDevice(int device)
 	return TRUE;
 }
 
-void CheckKey(string key) {
+void CheckKey(string key)
+{
 	if (GetKeyState(key[0]) & 0x8000)
 	{
 		Sleep(300);
@@ -249,11 +253,13 @@ void CheckKey(string key) {
 		pSAMP->AddChatMessage(-1, "[SSTT]: Saved!");
 		pSAMP->AddChatMessage(-1, "[SSTT]: Recognizion...");
 		std::string text = recognition("SSTT.wav");
-		if (text == "ERROR") {
+		if (text == "ERROR")
+		{
 			pSAMP->AddChatMessage(-1, "[SSTT]: ERROR!");
 			return;
 		}
-		if (text == "NOT RECOGNIZED") {
+		if (text == "NOT RECOGNIZED")
+		{
 			pSAMP->AddChatMessage(-1, "[SSTT]: NOT RECOGNIZED!");
 			return;
 		}
@@ -269,7 +275,7 @@ void CheckKey(string key) {
 		if (!key.compare("M"))
 			text = "/me " + text;
 
-		pSAMP->SendChat(const_cast<char*>(utf2cp(text).c_str()));
+		pSAMP->SendChat(const_cast<char *>(utf2cp(text).c_str()));
 		pSAMP->AddChatMessage(-1, "[SSTT]: Done!");
 	}
 }
