@@ -1,5 +1,4 @@
 #include "main.h"
-#include<SFML/Audio.hpp>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -8,32 +7,26 @@
 #include "plugin.h"
 #include "CTimer.h"
 #include "CHud.h"
-// basic file operations
 #include <iostream>
 #include <fstream>
-using namespace std;
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <iconvlite.h>
 
-HWND win = NULL;
+using namespace std;
+
 
 #define FREQ 48000
 #define CHANS 1
 #define BUFSTEP 200000	// memory allocation unit
 
 int input;				// current input source
-BYTE* recbuf = NULL;		// recording buffer
+BYTE* recbuf = NULL;	// recording buffer
 DWORD reclen;			// recording length
 HRECORD rchan = 0;		// recording channel
-HSTREAM chan = 0;			// playback channel
+HSTREAM chan = 0;		// playback channel
 
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-
-#define LINE_MAX 1024
 
 size_t write_response_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
@@ -66,11 +59,11 @@ int recognition(std::string filename)
 
 		struct curl_slist* headers = NULL;
 
-		headers = curl_slist_append(headers, "Authorization: Api-Key AQVN1Rh1i9ujODOnmHo38Yast0lwFUIG34nNID84");
+		headers = curl_slist_append(headers, "Content-Type: audio/x-wav");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
 		std::stringstream url;
-		url << "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?topic=general:rc&lang=ru-RU&format=lpcm&sampleRateHertz=48000";
+		url << "http://asr.yandex.net/asr_xml?uuid=12345678123456781234567812345678&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7";
 
 		curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
 
@@ -99,11 +92,11 @@ int recognition(std::string filename)
 		myfile.close();
 
 		std::string str = contentStream.str();
-		std::size_t pos = str.find("\"result\":");
+		std::size_t pos = str.find("<variant confidence=\"0\">");
 		std::string str3 = str.substr(pos);
 
-		str3 = str3.substr(10);
-		str3 = str3.substr(0, str3.size() - 2);
+		str3 = str3.substr(24);
+		str3 = str3.substr(0, str3.find("<"));
 		str3 = utf2cp(str3);
 
 		char* cstr = &str3[0];
@@ -116,7 +109,13 @@ int recognition(std::string filename)
 	return 0;
 }
 
-
+// display error messages
+void Error(const char* es)
+{
+	char mes[200];
+	sprintf(mes, "%s\n(error code: %d)", es, BASS_ErrorGetCode());
+	pSAMP->AddChatMessage(-1, mes);
+}
 
 BOOL CALLBACK RecordingCallback(HRECORD handle, const void* buffer, DWORD length, void* user)
 {
@@ -181,66 +180,13 @@ void WriteToDisk()
 {
 	FILE* fp;
 	char file[MAX_PATH] = "";
-	if (!(fp = fopen("test.wav", "wb"))) {
+	if (!(fp = fopen("SSTT.wav", "wb"))) {
 		Error("Can't create the file");
 		return;
 	}
+
 	fwrite(recbuf, reclen, 1, fp);
 	fclose(fp);
-}
-
-
-void UpdateInputInfo()
-{
-	const char* type;
-	float level;
-	int it = BASS_RecordGetInput(input, &level); // get info on the input
-	if (it == -1 || level < 0) { // failed to get level
-		it = BASS_RecordGetInput(-1, &level); // try master input instead
-		if (it == -1 || level < 0) { // that failed too
-			level = 1; // just display 100%
-		}
-	}
-	switch (it & BASS_INPUT_TYPE_MASK) {
-	case BASS_INPUT_TYPE_DIGITAL:
-		type = "digital";
-		break;
-	case BASS_INPUT_TYPE_LINE:
-		type = "line-in";
-		break;
-	case BASS_INPUT_TYPE_MIC:
-		type = "microphone";
-		break;
-	case BASS_INPUT_TYPE_SYNTH:
-		type = "midi synth";
-		break;
-	case BASS_INPUT_TYPE_CD:
-		type = "analog cd";
-		break;
-	case BASS_INPUT_TYPE_PHONE:
-		type = "telephone";
-		break;
-	case BASS_INPUT_TYPE_SPEAKER:
-		type = "pc speaker";
-		break;
-	case BASS_INPUT_TYPE_WAVE:
-		type = "wave/pcm";
-		break;
-	case BASS_INPUT_TYPE_AUX:
-		type = "aux";
-		break;
-	case BASS_INPUT_TYPE_ANALOG:
-		type = "analog";
-		break;
-	default:
-		type = "undefined";
-		{
-			// check if it's a loopback device
-			BASS_DEVICEINFO info;
-			BASS_RecordGetDeviceInfo(BASS_RecordGetDevice(), &info);
-			if (info.flags & BASS_DEVICE_LOOPBACK) type = "loopback";
-		}
-	}
 }
 
 BOOL InitDevice(int device)
@@ -260,7 +206,6 @@ BOOL InitDevice(int device)
 				input = c;
 			}
 		}
-		UpdateInputInfo();
 	}
 	return TRUE;
 }
@@ -270,14 +215,13 @@ void MainThread()
 {
 	bool initialized = false;
 
-	Sleep(1000);
 	while (true)
 	{
 		if (!initialized)
 		{
 			if (!pSAMP->IsInitialized()) continue;
 
-			pSAMP->AddChatMessage(-1, "SSTT Loaded.");
+			pSAMP->AddChatMessage(-1, "SSTT Loaded. Author: http://qrlk.me");
 
 			{
 				int c, def;
@@ -291,6 +235,8 @@ void MainThread()
 			}
 
 			initialized = true;
+
+			/*code*/
 		}
 		if (GetKeyState('R') & 0x8000)
 		{
@@ -300,30 +246,26 @@ void MainThread()
 			}
 			pSAMP->AddChatMessage(-1, "Started Recording");
 			StartRecording();
-			Sleep(2000);
 			while (GetKeyState('R') & 0x8000) {
 				Sleep(100);
+				if (reclen > 1024000)
+				{
+					pSAMP->AddChatMessage(-1, "[SSTT]: Вы достигли максимального размера файла. Запись прекращена.");
+					break;
+				}
 			}
 			pSAMP->AddChatMessage(-1, "Recording Finished");
 			StopRecording();
 			pSAMP->AddChatMessage(-1, "Saving...");
 			WriteToDisk();
 			pSAMP->AddChatMessage(-1, "Saved!");
-			recognition("test.wav");
+			recognition("SSTT.wav");
 			pSAMP->AddChatMessage(-1, "Done!");
 		}
 	}
 }
 
-// display error messages
-void Error(const char* es)
-{
-	char mes[200];
-	sprintf(mes, "%s\n(error code: %d)", es, BASS_ErrorGetCode());
-	pSAMP->AddChatMessage(-1, mes);
-}
 
-// buffer the recorded data
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 {
 	switch (dwReasonForCall)
