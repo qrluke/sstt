@@ -1,6 +1,6 @@
-# SSTT - Samp Speech-To-Text
+ # SSTT - Samp Speech-To-Text
 
 **Описание:** Простой ASI плагин, который записывает по **удержанию клавиши** звук с микрофона, сохраняет в wav, распознаёт через инфраструктуру Яндекса и возвращает результат прямо в чат сампа.  
 **Горячие клавиши:** R - говорить, P - /s [текст], N - /r [текст], M - /me [текст], L - /m [текст], B - /b [текст]
 
-**Требования:** SAMP 0.3.7-R1, ASI Loader, а так же библиотеки bass.dll, libcurl.dll и zlib1.dll.
+**Требования:** [SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe) и [ASI Loader](https://www.gtagarage.com/mods/show.php?id=21709). А так же библиотеки bass.dll, libcurl.dll и zlib1.dll (две последние есть в архиве релиза).
