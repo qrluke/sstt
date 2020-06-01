@@ -307,7 +307,7 @@ void MainThread()
 
 			initialized = true;
 
-			pSAMP->AddChatMessage(-1, "SSTT v31.05.2020 инициализирован. Держите клавишу, потом отпустите. Автор: qrlk.me");
+			pSAMP->AddChatMessage(-1, "SSTT v01.06.2020 инициализирован. Держите клавишу, потом отпустите. Автор: qrlk.me");
 			pSAMP->AddChatMessage(-1, "Github: https://github.com/qrlk/sstt");
 			pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
 		}
