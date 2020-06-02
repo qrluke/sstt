@@ -46,6 +46,8 @@ void SAMP::AddChatMessage(D3DCOLOR cColor, char *szMsg)
 // https://github.com/BlastHackNet/mod_s0beit_sa-1/blob/dc9b3b13599a8b6325e566f567b5391b0b2a6dc8/src/samp.cpp#L734
 void SAMP::SendChat(char *szMsg)
 {
+	Sleep(50);
+
 	if (g_Chat == nullptr)
 		return;
 
