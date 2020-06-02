@@ -31,6 +31,16 @@ enum
 	SAMP_CURSORUNLOCKACTORCAM = 0x09BC10,
 };
 
+
+enum ChatMessageType
+{
+	CHAT_TYPE_NONE = 0,
+	CHAT_TYPE_CHAT = 2,
+	CHAT_TYPE_INFO = 4,
+	CHAT_TYPE_DEBUG = 8
+};
+
+
 #pragma pack(push, 1)
 
 struct stSAMPPools
