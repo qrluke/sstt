@@ -93,10 +93,10 @@ void checkUpd(string url)
 		{
 			if (readBuffer.compare(version) != 0)
 			{
-				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Поямая ссылка:{FFFFFF}  https://qrlk.me/sstt. {FFD900}Подробнее: {FFFFFF} https://github.com/qrlk/sstt/releases");
-				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
+				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			}
 			else
 				pSAMP->AddChatMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
@@ -106,6 +106,7 @@ void checkUpd(string url)
 	}
 	return;
 }
+
 string recognition(string filename)
 {
 	CURL* curl = NULL;
