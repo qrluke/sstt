@@ -4,6 +4,8 @@
 #include "d3dx9.h"
 #include "iostream"
 #include "Windows.h"
+#include <iostream>
+#include <fstream>
 
 #define SAMP_INFO_OFFSET 0x21A0F8
 #define SAMP_CHAT_INFO_OFFSET 0x21A0E4
@@ -30,6 +32,16 @@ enum
 	SAMP_TOGGLECURSOR = 0x09BD30,
 	SAMP_CURSORUNLOCKACTORCAM = 0x09BC10,
 };
+
+
+enum ChatMessageType
+{
+	CHAT_TYPE_NONE = 0,
+	CHAT_TYPE_CHAT = 2,
+	CHAT_TYPE_INFO = 4,
+	CHAT_TYPE_DEBUG = 8
+};
+
 
 #pragma pack(push, 1)
 
@@ -85,7 +97,7 @@ struct stPlayerPool
 struct stInputBox
 {
 	void *pUnknown;
-	uint8_t bIsChatboxOpen;
+	uint8_t bChatboxOpen;
 	uint8_t bIsMouseInChatbox;
 	uint8_t bMouseClick_related;
 	uint8_t unk;
@@ -103,7 +115,7 @@ struct stInputInfo
 {
 	void *pD3DDevice;
 	void *pDXUTDialog;
-	stInputBox *pDXUTEditBox;
+	stInputBox *pInputBox;
 	CMDPROC pCMDs[SAMP_MAX_CLIENTCMDS];
 	char szCMDNames[SAMP_MAX_CLIENTCMDS][33];
 	int iCMDCount;
@@ -115,6 +127,7 @@ struct stInputInfo
 	int iTotalRecalls;
 	CMDPROC pszDefaultCMD;
 };
+
 
 #pragma pack(pop)
 
@@ -141,6 +154,7 @@ public:
 
 	void AddChatMessage(D3DCOLOR, char *);
 	void SendChat(char *);
+	bool isInput();
 
 	struct stSAMP *getInfo() { return g_SAMP; };
 	struct stPlayerPool *getPlayers() { return g_Players; };

@@ -1,16 +1,17 @@
 #pragma once
-
 #include "samp.h"
+#include <iostream>
+#include <fstream>
 
 bool SAMP::IsInitialized()
 {
-	g_SAMP = *(stSAMP **)(dwSAMPAddr + SAMP_INFO_OFFSET);
+	g_SAMP = *(stSAMP**)(dwSAMPAddr + SAMP_INFO_OFFSET);
 	if (g_SAMP == nullptr)
 		return false;
-	g_Chat = *(stChatInfo **)(dwSAMPAddr + SAMP_CHAT_INFO_OFFSET);
+	g_Chat = *(stChatInfo**)(dwSAMPAddr + SAMP_CHAT_INFO_OFFSET);
 	if (g_Chat == nullptr)
 		return false;
-	g_Input = *(stInputInfo **)(dwSAMPAddr + SAMP_CHAT_INPUT_INFO_OFFSET);
+	g_Input = *(stInputInfo**)(dwSAMPAddr + SAMP_CHAT_INPUT_INFO_OFFSET);
 	if (g_Input == nullptr)
 		return false;
 
@@ -22,44 +23,86 @@ bool SAMP::IsInitialized()
 	return true;
 };
 
-void SAMP::AddChatMessage(D3DCOLOR cColor, char *szMsg)
+// Source: https://github.com/BlastHackNet/mod_s0beit_sa-1/blob/dc9b3b13599a8b6325e566f567b5391b0b2a6dc8/src/samp.cpp#L734
+void SAMP::AddChatMessage(D3DCOLOR textColor, char* text)
 {
-	Sleep(50);
-	if (g_Chat == nullptr)
+	if (g_SAMP == NULL || g_Chat == NULL)
 		return;
 
-	void(__thiscall * AddToChatWindowBuffer)(const void *_this, int iType, char *szText, char *szPrefix, DWORD cColor, DWORD cPrefixColor) =
-		(void(__thiscall *)(const void *, int, char *, char *, DWORD, DWORD))(dwSAMPAddr + SAMP_FUNC_ADDTOCHATWND);
-
-	if (szMsg == NULL)
+	if (text == NULL)
 		return;
 
-	va_list ap;
-	char tmp[512];
-	memset(tmp, 0, 512);
-	va_start(ap, szMsg);
-	vsnprintf(tmp, sizeof(tmp) - 1, szMsg, ap);
-	va_end(ap);
+	void(__thiscall * AddToChatWindowBuffer) (void*, ChatMessageType, const char*, const char*, D3DCOLOR, D3DCOLOR) =
+		(void(__thiscall*) (void* _this, ChatMessageType Type, const char* szString, const char* szPrefix, D3DCOLOR TextColor, D3DCOLOR PrefixColor))
+		(dwSAMPAddr + SAMP_FUNC_ADDTOCHATWND);
 
-	return AddToChatWindowBuffer((void *)g_Chat, 8, tmp, NULL, cColor, 0x00);
+
+	AddToChatWindowBuffer(g_Chat, CHAT_TYPE_DEBUG, text, nullptr, textColor, 0);
 }
-// https://github.com/BlastHackNet/mod_s0beit_sa-1/blob/dc9b3b13599a8b6325e566f567b5391b0b2a6dc8/src/samp.cpp#L734
-void SAMP::SendChat(char *szMsg)
-{
-	Sleep(50);
 
-	if (g_Chat == nullptr)
+bool isBadPtr_handlerAny(void* pointer, ULONG size, DWORD dwFlags)
+{
+	DWORD						dwSize;
+	MEMORY_BASIC_INFORMATION	meminfo;
+
+	if (NULL == pointer)
+		return true;
+
+	memset(&meminfo, 0x00, sizeof(meminfo));
+	dwSize = VirtualQuery(pointer, &meminfo, sizeof(meminfo));
+
+	if (0 == dwSize)
+		return true;
+
+	if (MEM_COMMIT != meminfo.State)
+		return true;
+
+	if (0 == (meminfo.Protect & dwFlags))
+		return true;
+
+	if (size > meminfo.RegionSize)
+		return true;
+
+	if ((unsigned)((char*)pointer - (char*)meminfo.BaseAddress) > (unsigned)(meminfo.RegionSize - size))
+		return true;
+
+	return false;
+}
+
+bool isBadPtr_readAny(void* pointer, ULONG size)
+{
+	return isBadPtr_handlerAny(pointer, size, PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
+		PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
+}
+
+void SAMP::SendChat(char* text)
+{
+	if (g_SAMP == NULL)
 		return;
 
-	if (szMsg == NULL)
+	if (text == NULL)
+		return;
+	if (isBadPtr_readAny(text, 128))
 		return;
 
 	va_list ap;
-	char tmp[512];
-	memset(tmp, 0, 512);
-	va_start(ap, szMsg);
-	vsnprintf(tmp, sizeof(tmp) - 1, szMsg, ap);
+	char	tmp[128];
+	memset(tmp, 0, 128);
+
+	va_start(ap, text);
+	vsprintf(tmp, text, ap);
 	va_end(ap);
+
+	if (g_SAMP == NULL)
+		return;
+
+	if (tmp == NULL)
+		return;
+	if (isBadPtr_readAny(tmp, 128))
+		return;
+
+	if (tmp == NULL)
+		return;
 
 	if (tmp[0] == '/')
 	{
@@ -70,3 +113,45 @@ void SAMP::SendChat(char *szMsg)
 		((void(__thiscall*) (void* _this, char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, tmp);
 	}
 }
+
+// I have not a single idea what it actually is. But it works while I don't understand yet how to make similar functianality. 
+// Source: https://github.com/SAMPProjects/Open-SAMP-API/blob/d409a384bda26b996f2023d5199904186788708c/src/Open-SAMP-API/Client/SAMPFunctions.cpp#L176
+bool dataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
+{
+	for (; *szMask; ++szMask, ++pData, ++bMask)
+		if (*szMask == 'x' && *pData != *bMask)
+			return false;
+	return (*szMask) == NULL;
+}
+
+DWORD findPattern(DWORD addr, DWORD len, const BYTE* bMask, const char* szMask)
+{
+	for (DWORD i = 0; i < len; i++)
+		if (dataCompare((BYTE*)(addr + i), bMask, szMask))
+			return (DWORD)(addr + i);
+	return 0;
+}
+bool SAMP::isInput()
+{
+	static auto addr = findPattern(
+		dwSAMPAddr,
+		dwSAMPAddr,
+		(const BYTE*)"\x8B\x0D\x00\x00\x00\x00\x68\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8B\x0D\x00\x00\x00\x00\x68\x00\x00\x00\x00\x68\x00\x00\x00\x00\xE8",
+		"xx????x????x????xx????x????x????x"
+	);
+
+	if (addr == 0)
+		return false;
+
+	stInputInfo* pInputInfo = *(stInputInfo**)*(DWORD*)(addr + 0x2);
+
+	if (pInputInfo == NULL)
+		return false;
+	if (pInputInfo->pInputBox == NULL)
+		return false;
+
+	return pInputInfo->pInputBox->bChatboxOpen != 0;
+}
+
+
+
