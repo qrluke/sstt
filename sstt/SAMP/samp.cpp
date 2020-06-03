@@ -26,7 +26,6 @@ bool SAMP::IsInitialized()
 // Source: https://github.com/BlastHackNet/mod_s0beit_sa-1/blob/dc9b3b13599a8b6325e566f567b5391b0b2a6dc8/src/samp.cpp#L734
 void SAMP::AddChatMessage(D3DCOLOR textColor, char* text)
 {
-	Sleep(10);
 	if (g_SAMP == NULL || g_Chat == NULL)
 		return;
 
@@ -39,7 +38,6 @@ void SAMP::AddChatMessage(D3DCOLOR textColor, char* text)
 
 
 	AddToChatWindowBuffer(g_Chat, CHAT_TYPE_DEBUG, text, nullptr, textColor, 0);
-	Sleep(10);
 }
 
 bool isBadPtr_handlerAny(void* pointer, ULONG size, DWORD dwFlags)

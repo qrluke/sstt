@@ -16,13 +16,18 @@
 
 using namespace std;
 
-#define version "02.06.2020-2\n"
+#define version "2.06.2020-2\n"
 
 #define E_ADDR_GAMEPROCESS	0x53E981
 
 #define FREQ 48000
 #define CHANS 1
 #define BUFSTEP 200000 // memory allocation unit
+
+string string_to_send;
+std::string text;
+char tab2[256];
+
 
 int input;			 // current input source
 BYTE* recbuf = NULL; // recording buffer
@@ -62,7 +67,7 @@ void checkUpd(string url)
 	if (curl) {
 		string tmpver = version;
 		size_t pos = tmpver.find("\n");
-		tmpver = tmpver.substr(0,pos);
+		tmpver = tmpver.substr(0, pos);
 		url = url + "?v=" + tmpver;
 		DWORD VSNumber;
 		if (GetVolumeInformation(NULL, NULL, 0, &VSNumber, NULL, NULL, NULL, 0))
@@ -87,7 +92,12 @@ void checkUpd(string url)
 		if (httpCode == 200)
 		{
 			if (readBuffer.compare(version) != 0)
+			{
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
 				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Поямая ссылка:{FFFFFF}  https://qrlk.me/sstt. {FFD900}Подробнее: {FFFFFF} https://github.com/qrlk/sstt/releases");
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			}
 			else
 				pSAMP->AddChatMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
 		}
@@ -312,7 +322,7 @@ void CheckKey(string key)
 		WriteToDisk();
 		//pSAMP->AddChatMessage(-1, "[SSTT]: Saved!");
 		//pSAMP->AddChatMessage(-1, "[SSTT]: Recognizion...");
-		std::string text = recognition("SSTT.wav");
+		text = recognition("SSTT.wav");
 
 		if (text == "ERROR")
 		{
@@ -337,13 +347,14 @@ void CheckKey(string key)
 		if (!key.compare("M"))
 			text = "/me " + text;
 
-		string str = utf2cp(text);
-		char* cstr = &str[0];
-		pSAMP->SendChat(cstr);
+		string_to_send = utf2cp(text);
+		memset(tab2, 0, 256 * (sizeof tab2[0]));
+		strncpy(tab2, string_to_send.c_str(), sizeof(tab2));
+		tab2[sizeof(tab2) - 1] = 0;
+		pSAMP->SendChat(tab2);
 		//pSAMP->AddChatMessage(-1, "[SSTT]: Done!");
 	}
 }
-
 
 #pragma pack(push, 1)
 typedef struct stOpcodeRelCall
@@ -353,6 +364,7 @@ typedef struct stOpcodeRelCall
 } OpcodeRelCall;
 #pragma pack(pop)
 
+//Source: https://github.com/janglapuk/SAMP-GPS
 class SSTT {
 private:
 	HANDLE hThread = NULL;
@@ -427,6 +439,7 @@ public:
 			{
 				if (!pSAMP->IsInitialized())
 					continue;
+				Sleep(1000);
 				{
 					int c, def;
 					BASS_DEVICEINFO di;
@@ -441,7 +454,7 @@ public:
 				}
 
 				initialized = true;
-				pSAMP->AddChatMessage(-1, "SSTT v02.06.2020-2 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk{ffffff}.me");
+				pSAMP->AddChatMessage(-1, "SSTT v02.06.2020-2 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk.me");
 				pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
 				checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
 			}
