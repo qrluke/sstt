@@ -93,7 +93,7 @@ void checkUpd(string url)
 			{
 				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
-				pSAMP->AddChatMessage(-1, "{FF4500}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
+				pSAMP->AddChatMessage(-1, "{FFD900}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
 				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
 				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			}
@@ -292,7 +292,7 @@ BOOL InitDevice(int device)
 	return TRUE;
 }
 
-void CheckKey(string key)
+void CheckKey(const string& key)
 {
 	Sleep(10);
 	if (GetKeyState(key[0]) & 0x8000)
