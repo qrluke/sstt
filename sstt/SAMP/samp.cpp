@@ -75,8 +75,11 @@ bool isBadPtr_readAny(void* pointer, ULONG size)
 		PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 }
 
-void SAMP::SendChat(char* text)
+void SAMP::SendChat(std::string tex)
 {
+	char* text;
+	text = (char*)malloc(tex.size() + 1);
+	memcpy(text, tex.c_str(), tex.size() + 1);
 	if (g_SAMP == NULL)
 		return;
 
@@ -92,6 +95,8 @@ void SAMP::SendChat(char* text)
 	va_start(ap, text);
 	vsprintf(tmp, text, ap);
 	va_end(ap);
+	free(text);
+
 
 	if (g_SAMP == NULL)
 		return;
