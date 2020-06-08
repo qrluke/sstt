@@ -1,6 +1,5 @@
 #include "main.h"
 #include "audio/bass.h"
-#include "iconvlite/iconvlite.h"
 #include <string>
 #include <sstream>
 #include <curl/curl.h>
@@ -12,9 +11,8 @@
 
 #pragma comment( lib, "psapi.lib" )
 
-using namespace std;
 
-#define version "03.06.2020\n"
+#define version "08.06.2020\n"
 
 #define E_ADDR_GAMEPROCESS	0x53E981
 
@@ -22,8 +20,10 @@ using namespace std;
 #define CHANS 1
 #define BUFSTEP 200000 // memory allocation unit
 
-string string_to_send;
+int counter = 0;
+std::string string_to_send;
 std::string text;
+char str11[64];
 char cursedCharArray[512];
 
 
@@ -35,7 +35,7 @@ HSTREAM chan = 0;	 // playback channel
 
 size_t write_response_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
-	stringstream* s = (stringstream*)userdata;
+	std::stringstream* s = (std::stringstream*)userdata;
 	size_t n = size * nmemb;
 	s->write(ptr, n);
 	return n;
@@ -43,7 +43,7 @@ size_t write_response_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 
 size_t read_request_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
-	ifstream* f = (ifstream*)userdata;
+	std::ifstream* f = (std::ifstream*)userdata;
 	size_t n = size * nmemb;
 	f->read(ptr, n);
 	size_t result = f->gcount();
@@ -55,7 +55,7 @@ static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* use
 	return size * nmemb;
 }
 
-void checkUpd(string url)
+void checkUpd(std::string url)
 {
 	CURL* curl;
 	CURLcode res;
@@ -63,7 +63,7 @@ void checkUpd(string url)
 
 	curl = curl_easy_init();
 	if (curl) {
-		string tmpver = version;
+		std::string tmpver = version;
 		size_t pos = tmpver.find("\n");
 		tmpver = tmpver.substr(0, pos);
 		url = url + "?v=" + tmpver;
@@ -106,7 +106,7 @@ void checkUpd(string url)
 	return;
 }
 
-string recognition(string filename)
+std::string recognition(std::string filename)
 {
 	CURL* curl = NULL;
 	curl = curl_easy_init();
@@ -123,12 +123,12 @@ string recognition(string filename)
 		headers = curl_slist_append(headers, "Content-Type: audio/x-wav");
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-		stringstream url;
+		std::stringstream url;
 		url << "http://asr.yandex.net/asr_xml?uuid=12345678123456781234567812345678&disableAntimat=true&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7";
 
 		curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
 
-		ifstream fileStream(filename, ifstream::binary);
+		std::ifstream fileStream(filename, std::ifstream::binary);
 		fileStream.seekg(0, fileStream.end);
 		int length = fileStream.tellg();
 		fileStream.seekg(0, fileStream.beg);
@@ -137,7 +137,7 @@ string recognition(string filename)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, length);
 		curl_easy_setopt(curl, CURLOPT_READDATA, &fileStream);
 
-		stringstream contentStream;
+		std::stringstream contentStream;
 
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_response_data);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &contentStream);
@@ -146,15 +146,15 @@ string recognition(string filename)
 
 		unsigned httpCode;
 		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
-		ofstream myfile;
+		std::ofstream myfile;
 		myfile.open("SSTT-last-response.log");
 		myfile << "Http code is " << httpCode << "\n";
 		myfile << contentStream.str() << "\n";
 		myfile.close();
 		if (httpCode == 200)
 		{
-			string str = contentStream.str();
-			string s2 = "<recognitionResults success=\"0\" />";
+			std::string str = contentStream.str();
+			std::string s2 = "<recognitionResults success=\"0\" />";
 			if (strstr(str.c_str(), s2.c_str()))
 			{
 				curl_free(headers);
@@ -163,7 +163,7 @@ string recognition(string filename)
 			}
 
 			size_t pos = str.find("<variant confidence=\"0\">");
-			string str3 = str.substr(pos);
+			std::string str3 = str.substr(pos);
 
 			str3 = str3.substr(24);
 			str3 = str3.substr(0, str3.find("<"));
@@ -292,7 +292,72 @@ BOOL InitDevice(int device)
 	return TRUE;
 }
 
-void CheckKey(const string& key)
+std::string Utf8_to_cp1251(const char* str)
+{
+	std::string res;
+	int result_u, result_c;
+
+
+	result_u = MultiByteToWideChar(CP_UTF8,
+		0,
+		str,
+		-1,
+		0,
+		0);
+
+	if (!result_u)
+		return 0;
+
+	wchar_t* ures = new wchar_t[result_u];
+
+	if (!MultiByteToWideChar(CP_UTF8,
+		0,
+		str,
+		-1,
+		ures,
+		result_u))
+	{
+		delete[] ures;
+		return 0;
+	}
+
+
+	result_c = WideCharToMultiByte(
+		1251,
+		0,
+		ures,
+		-1,
+		0,
+		0,
+		0, 0);
+
+	if (!result_c)
+	{
+		delete[] ures;
+		return 0;
+	}
+
+	char* cres = new char[result_c];
+
+	if (!WideCharToMultiByte(
+		1251,
+		0,
+		ures,
+		-1,
+		cres,
+		result_c,
+		0, 0))
+	{
+		delete[] cres;
+		return 0;
+	}
+	delete[] ures;
+	res.append(cres);
+	delete[] cres;
+	return res;
+}
+
+void CheckKey(const std::string& key)
 {
 	Sleep(10);
 	if (GetKeyState(key[0]) & 0x8000)
@@ -347,12 +412,13 @@ void CheckKey(const string& key)
 		if (!key.compare("M"))
 			text = "/me " + text;
 
-		string_to_send = utf2cp(text);
-		memset(cursedCharArray, 0, 512 * (sizeof cursedCharArray[0]));
-		strncpy(cursedCharArray, string_to_send.c_str(), sizeof(cursedCharArray));
-		cursedCharArray[sizeof(cursedCharArray) - 1] = 0;
-		pSAMP->SendChat(cursedCharArray);
-		//pSAMP->AddChatMessage(-1, "[SSTT]: Done!");
+		string_to_send = Utf8_to_cp1251(text.c_str());
+
+		pSAMP->SendChat(string_to_send);
+
+		counter++;
+        //sprintf(str11, "[SSTT]: Done! Times: %d", counter);
+		//pSAMP->AddChatMessage(-1, str11);
 	}
 }
 
@@ -440,7 +506,7 @@ public:
 			{
 				if (!pSAMP->IsInitialized())
 					continue;
-				Sleep(1000);
+				Sleep(250);
 				{
 					int c, def;
 					BASS_DEVICEINFO di;

@@ -153,7 +153,7 @@ public:
 	bool IsInitialized();
 
 	void AddChatMessage(D3DCOLOR, char *);
-	void SendChat(char *);
+	void SendChat(const std::string &text);
 	bool isInput();
 
 	struct stSAMP *getInfo() { return g_SAMP; };
