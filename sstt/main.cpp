@@ -12,7 +12,7 @@
 #pragma comment( lib, "psapi.lib" )
 
 
-#define version "03.06.2020\n"
+#define version "08.06.2020\n"
 
 #define E_ADDR_GAMEPROCESS	0x53E981
 
@@ -417,8 +417,8 @@ void CheckKey(const std::string& key)
 		pSAMP->SendChat(string_to_send);
 
 		counter++;
-		sprintf(str11, "[SSTT]: Done! Times: %d", counter);
-		pSAMP->AddChatMessage(-1, str11);
+        //sprintf(str11, "[SSTT]: Done! Times: %d", counter);
+		//pSAMP->AddChatMessage(-1, str11);
 	}
 }
 
@@ -506,7 +506,7 @@ public:
 			{
 				if (!pSAMP->IsInitialized())
 					continue;
-				Sleep(1000);
+				Sleep(250);
 				{
 					int c, def;
 					BASS_DEVICEINFO di;
