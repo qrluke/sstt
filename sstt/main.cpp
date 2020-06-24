@@ -46,7 +46,7 @@ size_t read_request_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 	std::ifstream* f = (std::ifstream*)userdata;
 	size_t n = size * nmemb;
 	f->read(ptr, n);
-	size_t result = f->gcount();
+	size_t result = static_cast<size_t>(f->gcount());
 	return result;
 }
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
@@ -130,7 +130,7 @@ std::string recognition(std::string filename)
 
 		std::ifstream fileStream(filename, std::ifstream::binary);
 		fileStream.seekg(0, fileStream.end);
-		int length = fileStream.tellg();
+		int length = static_cast<size_t>(fileStream.tellg());
 		fileStream.seekg(0, fileStream.beg);
 
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, &read_request_data);
