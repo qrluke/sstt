@@ -12,7 +12,7 @@
 #pragma comment( lib, "psapi.lib" )
 
 
-#define version "08.06.2020\n\n"
+#define version "24.06.2020\n\n"
 
 #define E_ADDR_GAMEPROCESS	0x53E981
 
