@@ -380,52 +380,46 @@ void CheckKey(const std::string& key)
 
 void MainThread()
 {
+
+	while (!pSAMP->IsInitialized())
+		Sleep(1000);
+
 	bool initialized = false;
 
 	while (true)
 	{
-		while (!pSAMP->IsInitialized())
-			Sleep(100);
+		Sleep(100);
+
 		if (!initialized)
 		{
-			if (!pSAMP->IsInitialized()) continue;
-
-			bool initialized = false;
-			while (true)
+			if (!initialized)
 			{
-				Sleep(100);
-
-				if (!initialized)
 				{
-					if (!pSAMP->IsInitialized())
-						continue;
-					Sleep(250);
+					int c, def;
+					BASS_DEVICEINFO di;
+					for (c = 0; BASS_RecordGetDeviceInfo(c, &di); c++)
 					{
-						int c, def;
-						BASS_DEVICEINFO di;
-						for (c = 0; BASS_RecordGetDeviceInfo(c, &di); c++)
+						if (di.flags & BASS_DEVICE_DEFAULT)
 						{
-							if (di.flags & BASS_DEVICE_DEFAULT)
-							{
-								def = c;
-							}
+							def = c;
 						}
-						InitDevice(def);
 					}
-
-					initialized = true;
-					pSAMP->AddChatMessage(-1, "SSTT v24.06.2020 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk.me");
-					pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
-					checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
+					InitDevice(def);
 				}
-				CheckKey("R");
-				CheckKey("P");
-				CheckKey("N");
-				CheckKey("B");
-				CheckKey("L");
-				CheckKey("M");
+
+				initialized = true;
+				pSAMP->AddChatMessage(-1, "SSTT v24.06.2020 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk.me");
+				pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
+				checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
 			}
 		}
+
+		CheckKey("R");
+		CheckKey("P");
+		CheckKey("N");
+		CheckKey("B");
+		CheckKey("L");
+		CheckKey("M");
 	}
 }
 
