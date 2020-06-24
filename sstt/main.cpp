@@ -12,7 +12,7 @@
 #pragma comment( lib, "psapi.lib" )
 
 
-#define version "08.06.2020\n"
+#define version "08.06.2020\n\n"
 
 #define E_ADDR_GAMEPROCESS	0x53E981
 
@@ -49,6 +49,7 @@ size_t read_request_data(char* ptr, size_t size, size_t nmemb, void* userdata)
 	size_t result = static_cast<size_t>(f->gcount());
 	return result;
 }
+
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
@@ -253,6 +254,7 @@ void StopRecording()
 	// create a stream from the recording
 	chan = BASS_StreamCreateFile(TRUE, recbuf, 0, reclen, 0);
 }
+
 // write the recorded data to disk
 void WriteToDisk()
 {
@@ -292,69 +294,20 @@ BOOL InitDevice(int device)
 	return TRUE;
 }
 
-std::string Utf8_to_cp1251(const char* str)
+std::string lite_conv(std::string src, UINT cp_from, UINT cp_to)
 {
-	std::string res;
-	int result_u, result_c;
+	if (src.empty())
+		return std::string();
 
+	int wstr_len = MultiByteToWideChar(cp_from, NULL, src.c_str(), src.length(), NULL, 0);
+	std::wstring wide_str(wstr_len, L'\x00');
+	MultiByteToWideChar(cp_from, NULL, src.c_str(), src.length(), &wide_str[0], wstr_len);
 
-	result_u = MultiByteToWideChar(CP_UTF8,
-		0,
-		str,
-		-1,
-		0,
-		0);
+	int outstr_len = WideCharToMultiByte(cp_to, NULL, &wide_str[0], wide_str.length(), NULL, 0, NULL, NULL);
+	std::string final_str(outstr_len, '\x00');
+	WideCharToMultiByte(cp_to, NULL, &wide_str[0], wide_str.length(), &final_str[0], outstr_len, NULL, NULL);
 
-	if (!result_u)
-		return 0;
-
-	wchar_t* ures = new wchar_t[result_u];
-
-	if (!MultiByteToWideChar(CP_UTF8,
-		0,
-		str,
-		-1,
-		ures,
-		result_u))
-	{
-		delete[] ures;
-		return 0;
-	}
-
-
-	result_c = WideCharToMultiByte(
-		1251,
-		0,
-		ures,
-		-1,
-		0,
-		0,
-		0, 0);
-
-	if (!result_c)
-	{
-		delete[] ures;
-		return 0;
-	}
-
-	char* cres = new char[result_c];
-
-	if (!WideCharToMultiByte(
-		1251,
-		0,
-		ures,
-		-1,
-		cres,
-		result_c,
-		0, 0))
-	{
-		delete[] cres;
-		return 0;
-	}
-	delete[] ures;
-	res.append(cres);
-	delete[] cres;
-	return res;
+	return final_str;
 }
 
 void CheckKey(const std::string& key)
@@ -389,148 +342,102 @@ void CheckKey(const std::string& key)
 		//pSAMP->AddChatMessage(-1, "[SSTT]: Recognizion...");
 		text = recognition("SSTT.wav");
 
-		if (text == "ERROR")
-		{
-			pSAMP->AddChatMessage(-1, "[SSTT]: Непредвиденная ошибка сетевого характера :(");
-			return;
+		if (!text.empty()) {
+			if (text == "ERROR")
+			{
+				pSAMP->AddChatMessage(-1, "[SSTT]: Непредвиденная ошибка сетевого характера :(");
+				return;
+			}
+
+			if (text == "NOT RECOGNIZED")
+			{
+				pSAMP->AddChatMessage(-1, "[SSTT]: Не удалось распознать/нет доступа к API!");
+				return;
+			}
+			if (!key.compare("N"))
+				text = "/r " + text;
+			if (!key.compare("P"))
+				text = "/s " + text;
+			if (!key.compare("B"))
+				text = "/b " + text;
+			if (!key.compare("L"))
+				text = "/m " + text;
+			if (!key.compare("M"))
+				text = "/me " + text;
+
+			string_to_send = lite_conv(text, CP_UTF8, CP_ACP);
+			if (string_to_send.length() > 128)
+				string_to_send.resize(128);
+
+			pSAMP->SendChat(string_to_send.c_str());
+
+			counter++;
+			//sprintf(str11, "[SSTT]: Done! Times: %d", counter);
+			//pSAMP->AddChatMessage(-1, str11);
 		}
-
-		if (text == "NOT RECOGNIZED")
-		{
-			pSAMP->AddChatMessage(-1, "[SSTT]: Не удалось распознать/нет доступа к API!");
-			return;
-		}
-
-		if (!key.compare("N"))
-			text = "/r " + text;
-		if (!key.compare("P"))
-			text = "/s " + text;
-		if (!key.compare("B"))
-			text = "/b " + text;
-		if (!key.compare("L"))
-			text = "/m " + text;
-		if (!key.compare("M"))
-			text = "/me " + text;
-
-		string_to_send = Utf8_to_cp1251(text.c_str());
-
-		pSAMP->SendChat(string_to_send);
-
-		counter++;
-        //sprintf(str11, "[SSTT]: Done! Times: %d", counter);
-		//pSAMP->AddChatMessage(-1, str11);
 	}
 }
 
-#pragma pack(push, 1)
-typedef struct stOpcodeRelCall
+void MainThread()
 {
-	BYTE bOpcode;
-	DWORD dwRelAddr;
-} OpcodeRelCall;
-#pragma pack(pop)
+	bool initialized = false;
 
-//Source: https://github.com/janglapuk/SAMP-GPS
-//Used temporary
-class SSTT {
-private:
-	HANDLE hThread = NULL;
-
-public:
-	SSTT() {
-		hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)SSTT::init, (LPVOID)this, 0, (LPDWORD)NULL);
-	}
-
-	~SSTT() {
-		// Check if thread still running on process
-		if (hThread != NULL)
-			TerminateThread(hThread, 0);
-	}
-
-	static LPVOID WINAPI init(LPVOID* lpParam) {
-		MODULEINFO miSampDll;
-		DWORD dwSampDllBaseAddr, dwSampDllEndAddr, dwCallAddr;
-
-		SSTT* sender = (SSTT*)lpParam;
-
-		stOpcodeRelCall* fnGameProc = (stOpcodeRelCall*)E_ADDR_GAMEPROCESS;
-
-		// Check if E_ADDR_GAMEPROCESS opcode is a relative call (0xE8)
-		while (fnGameProc->bOpcode != 0xE8)
-			Sleep(100);
-
-		while (true) {
-			Sleep(100);
-
-			// Get samp.dll module information to get base address and end address
-			if (!GetModuleInformation(GetCurrentProcess(), GetModuleHandle("samp.dll"), &miSampDll, sizeof(MODULEINFO))) {
-				continue;
-			}
-
-			// Some stupid calculation
-			dwSampDllBaseAddr = (DWORD)miSampDll.lpBaseOfDll;
-			dwSampDllEndAddr = dwSampDllBaseAddr + miSampDll.SizeOfImage;
-
-			// Calculate destination address by offset and relative call opcode size
-			dwCallAddr = fnGameProc->dwRelAddr + E_ADDR_GAMEPROCESS + 5;
-
-			// Check if dwCallAddr is a samp.dll's hook address, 
-			// to make sure this plugin hook (Events::gameProcessEvent) not replaced by samp.dll
-			if (dwCallAddr >= dwSampDllBaseAddr && dwCallAddr <= dwSampDllEndAddr)
-				break;
-		}
-
-		pSAMP = new SAMP(GetModuleHandleA("SAMP.DLL"));
-
-		// Just wait a few secs for the game loaded fully to avoid any conflicts and crashes
-		// I don't know what the elegant way is :)
+	while (true)
+	{
 		while (!pSAMP->IsInitialized())
 			Sleep(100);
-
-		// Run the plugin
-		sender->run();
-
-		// Reset the thread handle
-		sender->hThread = NULL;
-
-		return NULL;
-	}
-
-	void run() {
-		bool initialized = false;
-		while (true)
+		if (!initialized)
 		{
-			Sleep(100);
+			if (!pSAMP->IsInitialized()) continue;
 
-			if (!initialized)
+			bool initialized = false;
+			while (true)
 			{
-				if (!pSAMP->IsInitialized())
-					continue;
-				Sleep(250);
-				{
-					int c, def;
-					BASS_DEVICEINFO di;
-					for (c = 0; BASS_RecordGetDeviceInfo(c, &di); c++)
-					{
-						if (di.flags & BASS_DEVICE_DEFAULT)
-						{
-							def = c;
-						}
-					}
-					InitDevice(def);
-				}
+				Sleep(100);
 
-				initialized = true;
-				pSAMP->AddChatMessage(-1, "SSTT v03.06.2020 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk.me");
-				pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
-				checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
+				if (!initialized)
+				{
+					if (!pSAMP->IsInitialized())
+						continue;
+					Sleep(250);
+					{
+						int c, def;
+						BASS_DEVICEINFO di;
+						for (c = 0; BASS_RecordGetDeviceInfo(c, &di); c++)
+						{
+							if (di.flags & BASS_DEVICE_DEFAULT)
+							{
+								def = c;
+							}
+						}
+						InitDevice(def);
+					}
+
+					initialized = true;
+					pSAMP->AddChatMessage(-1, "SSTT v03.06.2020 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}qrlk.me");
+					pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
+					checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
+				}
+				CheckKey("R");
+				CheckKey("P");
+				CheckKey("N");
+				CheckKey("B");
+				CheckKey("L");
+				CheckKey("M");
 			}
-			CheckKey("R");
-			CheckKey("P");
-			CheckKey("N");
-			CheckKey("B");
-			CheckKey("L");
-			CheckKey("M");
 		}
 	}
-} SSTT;
+}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
+{
+	switch (dwReasonForCall)
+	{
+	case DLL_PROCESS_ATTACH:
+		Sleep(1000);
+		pSAMP = new SAMP(GetModuleHandleA("SAMP.DLL"));
+		beginThread(MainThread);
+		break;
+	}
+	return TRUE;
+}

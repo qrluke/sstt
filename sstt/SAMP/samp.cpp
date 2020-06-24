@@ -75,55 +75,19 @@ bool isBadPtr_readAny(void* pointer, ULONG size)
 		PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 }
 
-void SAMP::SendChat(const std::string &tex)
+// Фунция sampSendChat без форматирования текста.
+void SAMP::SendChat(const char* text)
 {
-	char* text;
-	text = (char*)malloc(tex.size() + 1);
-	memcpy(text, tex.c_str(), tex.size() + 1);
-	if (g_SAMP == NULL)
+	if (text == nullptr)
+		return;
+
+	if (text[0] == '/')
 	{
-		free(text);
-		return;
-	}
-
-	if (text == NULL) {
-		free(text);
-		return;
-	}
-	if (isBadPtr_readAny(text, 128))
-	{
-		free(text);
-		return;
-	}
-
-	va_list ap;
-	char	tmp[128];
-	memset(tmp, 0, 128);
-
-	va_start(ap, text);
-	vsprintf(tmp, text, ap);
-	va_end(ap);
-	free(text);
-
-
-	if (g_SAMP == NULL)
-		return;
-
-	if (tmp == NULL)
-		return;
-	if (isBadPtr_readAny(tmp, 128))
-		return;
-
-	if (tmp == NULL)
-		return;
-
-	if (tmp[0] == '/')
-	{
-		((void(__thiscall*) (void* _this, char* message)) (dwSAMPAddr + SAMP_SENDCMD))(g_Input, tmp);
+		((void(__thiscall*) (void* _this, const char* message)) (dwSAMPAddr + SAMP_SENDCMD))(g_Input, text);
 	}
 	else
 	{
-		((void(__thiscall*) (void* _this, char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, tmp);
+		((void(__thiscall*) (void* _this, const char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, text);
 	}
 }
 
@@ -160,10 +124,10 @@ bool SAMP::isInput()
 
 	if (pInputInfo == NULL)
 		return false;
-	if (pInputInfo->pInputBox == NULL)
+	if (pInputInfo->pDXUTEditBox == NULL)
 		return false;
 
-	return pInputInfo->pInputBox->bChatboxOpen != 0;
+	return pInputInfo->pDXUTEditBox->bIsChatboxOpen != 0;
 }
 
 
