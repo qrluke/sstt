@@ -1,11 +1,13 @@
-#include "iostream"
+#include <windows.h>
+
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+
 #include "SAMP/samp.h"
+#include "audio/bass.h"
+
+#include <curl\curl.h>
 
 extern SAMP *pSAMP;
-
-SAMP *pSAMP;
-
-
-void beginThread(void *__startAddress) { CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)__startAddress, NULL, NULL, NULL); }
-
-LONG prevWndProc;
