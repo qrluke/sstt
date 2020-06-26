@@ -23,7 +23,7 @@ bool SAMP::IsInitialized()
 // Функция sampAddChatMessage с форматированием текста.
 void SAMP::AddChatMessage(D3DCOLOR color, const char *format, ...)
 {
-	if (!this->IsInitialized() || format == NULL)
+	if (format == NULL)
 		return;
 
 	va_list ap;

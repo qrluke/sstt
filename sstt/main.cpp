@@ -283,7 +283,7 @@ DWORD WINAPI MainThread(LPVOID p)
 
 	pSAMP = new SAMP(dwSAMPAddr);
 	while (!pSAMP->IsInitialized())
-		Sleep(100);
+		Sleep(1000);
 
 	if (!BASS_RecordInit(-1) && BASS_ErrorGetCode() != BASS_ERROR_ALREADY)
 	{
