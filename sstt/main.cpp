@@ -1,6 +1,6 @@
 #include "main.h"
 
-class SAMP *pSAMP;
+class SAMP* pSAMP;
 
 #define version "24.06.2020\n\n"
 
@@ -100,7 +100,7 @@ std::string recognition(void* file, size_t size)
 
 		curl_easy_setopt(curl, CURLOPT_URL, __URL);
 
-		readptr = (byte*) file;
+		readptr = (byte*)file;
 		available = size;
 
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, &read_request_data);
@@ -111,7 +111,7 @@ std::string recognition(void* file, size_t size)
 		std::string result;
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
-		
+
 
 		CURLcode code = curl_easy_perform(curl);
 
@@ -223,7 +223,15 @@ void CheckKey(char key)
 	if (pSAMP->isInput() == 1) {
 		return;
 	}
-		if (pSAMP->isInput() == 1) {
+	
+	Sleep(200);
+	
+	if (!(GetKeyState(key) & 0x8000))
+	{
+		return;
+	}
+
+	if (pSAMP->isInput() == 1) {
 		return;
 	}
 

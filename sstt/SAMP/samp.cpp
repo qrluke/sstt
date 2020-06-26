@@ -92,5 +92,3 @@ bool SAMP::isInput()
 
 	return pInputInfo->pDXUTEditBox->bIsChatboxOpen != 0;
 }
-
-
