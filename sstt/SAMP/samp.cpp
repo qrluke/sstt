@@ -51,3 +51,46 @@ void SAMP::SendChat(const char* text)
 		((void(__thiscall*) (void* _this, const char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, text);
 	}
 }
+
+
+// I have not a single idea what it actually is. But it works while I don't understand yet how to make similar functianality. 
+// Source: https://github.com/SAMPProjects/Open-SAMP-API/blob/d409a384bda26b996f2023d5199904186788708c/src/Open-SAMP-API/Client/SAMPFunctions.cpp#L176
+bool dataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
+{
+	for (; *szMask; ++szMask, ++pData, ++bMask)
+		if (*szMask == 'x' && *pData != *bMask)
+			return false;
+	return (*szMask) == NULL;
+}
+
+DWORD findPattern(DWORD addr, DWORD len, const BYTE* bMask, const char* szMask)
+{
+	for (DWORD i = 0; i < len; i++)
+		if (dataCompare((BYTE*)(addr + i), bMask, szMask))
+			return (DWORD)(addr + i);
+	return 0;
+}
+
+bool SAMP::isInput()
+{
+	static auto addr = findPattern(
+		dwSAMPAddr,
+		dwSAMPAddr,
+		(const BYTE*)"\x8B\x0D\x00\x00\x00\x00\x68\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8B\x0D\x00\x00\x00\x00\x68\x00\x00\x00\x00\x68\x00\x00\x00\x00\xE8",
+		"xx????x????x????xx????x????x????x"
+	);
+
+	if (addr == 0)
+		return false;
+
+	stInputInfo* pInputInfo = *(stInputInfo**)*(DWORD*)(addr + 0x2);
+
+	if (pInputInfo == NULL)
+		return false;
+	if (pInputInfo->pDXUTEditBox == NULL)
+		return false;
+
+	return pInputInfo->pDXUTEditBox->bIsChatboxOpen != 0;
+}
+
+

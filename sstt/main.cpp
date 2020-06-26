@@ -219,6 +219,13 @@ void CheckKey(char key)
 {
 	if (!(GetKeyState(key) & 0x8000))
 		return;
+	
+	if (pSAMP->isInput() == 1) {
+		return;
+	}
+		if (pSAMP->isInput() == 1) {
+		return;
+	}
 
 	StartRecording();
 	while (GetKeyState(key) & 0x8000)

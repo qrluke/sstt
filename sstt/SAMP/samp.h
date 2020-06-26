@@ -862,6 +862,7 @@ public:
 
 	void AddChatMessage(D3DCOLOR color, const char *format, ...);
 	void SendChat(const char* text);
+	bool isInput();
 
 	struct stSAMP* getInfo() { return g_SAMP; };
 	struct stPlayerPool* getPlayers() { return g_Players; };
