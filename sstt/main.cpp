@@ -100,7 +100,7 @@ std::string recognition(void* file, size_t size)
 
 		curl_easy_setopt(curl, CURLOPT_URL, __URL);
 
-		readptr = file;
+		readptr = (byte*) file;
 		available = size;
 
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, &read_request_data);

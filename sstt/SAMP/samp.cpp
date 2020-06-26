@@ -13,7 +13,7 @@ bool SAMP::IsInitialized()
 		return false;
 
 	//g_Vehicles = g_SAMP->pPools->pVehicle;
-	//g_Players = g_SAMP->pPools->pPlayer;
+	g_Players = g_SAMP->pPools->pPlayer;
 
 	isInited = true;
 
