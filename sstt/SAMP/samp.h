@@ -1,9 +1,10 @@
 #pragma once
 
-#include "d3d9.h"
-#include "d3dx9.h"
-#include "iostream"
-#include "Windows.h"
+#include <d3d9.h>
+#include <d3dx9.h>
+#include <windows.h>
+#include <stdint.h>
+#include <stdio.h>
 
 #define SAMP_INFO_OFFSET							0x21A0F8
 #define SAMP_CHAT_INFO_OFFSET						0x21A0E4
@@ -852,24 +853,15 @@ class SAMP
 public:
 	bool isInited;
 
-	SAMP(HMODULE hModule)
+	SAMP(DWORD hModule)
 	{
-		isInited = false;
-		if (hModule) dwSAMPAddr = (DWORD)hModule;
-	};
-
-	~SAMP()
-	{
-		delete g_SAMP;
-		delete g_Chat;
-		delete g_Input;
+		dwSAMPAddr = hModule;
 	};
 
 	bool IsInitialized();
 
-	void AddChatMessage(D3DCOLOR, char*);
+	void AddChatMessage(D3DCOLOR color, const char *format, ...);
 	void SendChat(const char* text);
-	bool isInput();
 
 	struct stSAMP* getInfo() { return g_SAMP; };
 	struct stPlayerPool* getPlayers() { return g_Players; };
