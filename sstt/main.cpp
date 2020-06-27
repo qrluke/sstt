@@ -306,7 +306,7 @@ DWORD WINAPI MainThread(LPVOID p)
 		ExitThread(0);
 	}
 
-	pSAMP->AddChatMessage(-1, "SSTT v%s инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}em.klrq", version);
+	pSAMP->AddChatMessage(-1, "SSTT v%s инициализирован. Держите клавишу, потом отпустите. Авторы: {348cb2}qrlk{ffffff}, {cc0000}redcode", version);
 	pSAMP->AddChatMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
 	checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
 
