@@ -17,6 +17,9 @@ HRECORD rchan = 0;
 byte* readptr = NULL;
 size_t available = 0;
 
+std::string to_send;
+std::string text;
+
 size_t read_request_data(void* ptr, size_t size, size_t nmemb, void* userdata)
 {
 	size_t _cur = min(size * nmemb, available);
@@ -215,17 +218,17 @@ std::string lite_conv(std::string src, UINT cp_from, UINT cp_to)
 	return final_str;
 }
 
-void CheckKey(char key)
+void CheckKey(const char key)
 {
 	if (!(GetKeyState(key) & 0x8000))
 		return;
-	
+
 	if (pSAMP->isInput() == 1) {
 		return;
 	}
-	
+
 	Sleep(200);
-	
+
 	if (!(GetKeyState(key) & 0x8000))
 	{
 		return;
@@ -247,7 +250,7 @@ void CheckKey(char key)
 	}
 	StopRecording();
 
-	std::string text = recognition(recbuf, reclen);
+	text = recognition(recbuf, reclen);
 
 	if (text.empty())
 	{
@@ -276,18 +279,24 @@ void CheckKey(char key)
 		break;
 	}
 
-	std::string to_send = lite_conv(text, CP_UTF8, CP_ACP);
+	to_send = lite_conv(text, CP_UTF8, CP_ACP);
 	if (to_send.length() > 128)
 		to_send.resize(128);
 
-	pSAMP->SendChat(to_send.c_str());
+	char* chr = strdup(to_send.c_str());
+
+	pSAMP->SendChat(chr);
+
+	free(chr);
 
 	/*
 	static int counter = 0;
 	counter++;
 	pSAMP->AddChatMessage(-1, "[SSTT]: Done! Times: %d", counter);
+	со счетчиком крашнуло через 100, без него - все было ок 1200 раз
 	*/
 }
+
 
 DWORD WINAPI MainThread(LPVOID p)
 {

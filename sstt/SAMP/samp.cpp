@@ -21,7 +21,7 @@ bool SAMP::IsInitialized()
 };
 
 // Функция sampAddChatMessage с форматированием текста.
-void SAMP::AddChatMessage(D3DCOLOR color, const char *format, ...)
+void SAMP::AddChatMessage(D3DCOLOR color, const char* format, ...)
 {
 	if (format == NULL)
 		return;
@@ -50,6 +50,8 @@ void SAMP::SendChat(const char* text)
 	{
 		((void(__thiscall*) (void* _this, const char* message)) (dwSAMPAddr + SAMP_SENDSAY)) (g_Players->pLocalPlayer, text);
 	}
+
+	free((char*)text);
 }
 
 

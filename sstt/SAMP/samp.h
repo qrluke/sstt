@@ -860,7 +860,7 @@ public:
 
 	bool IsInitialized();
 
-	void AddChatMessage(D3DCOLOR color, const char *format, ...);
+	void AddChatMessage(D3DCOLOR color, const char* format, ...);
 	void SendChat(const char* text);
 	bool isInput();
 
