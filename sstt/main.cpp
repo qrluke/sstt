@@ -2,7 +2,7 @@
 
 class SAMP* pSAMP;
 
-#define version "24.06.2020\n\n"
+#define version "27.06.2020\n\n"
 
 #define __URL "http://asr.yandex.net/asr_xml?uuid=12345678123456781234567812345678&disableAntimat=true&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7"
 
