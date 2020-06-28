@@ -4,86 +4,119 @@ class SAMP *pSAMP;
 
 #define version "24.06.2020\n\n"
 
-#define __URL "http://asr.yandex.net/asr_xml?uuid=12345678123456781234567812345678&disableAntimat=true&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7"
+#define __URL "http://asr.yandex.net/asr_xml?uuid=12345678123456781234546112345678&disableAntimat=true&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7"
 
-#define FREQ 48000
-#define CHANS 1
-#define BUFSTEP 200000 // memory allocation unit
+#define RECORD_SAMPLERATE	48000
+#define RECORD_CHANNELS		1
+#define RECORD_BPS			16
+#define RECORD_BUFSTEP		(RECORD_SAMPLERATE * RECORD_CHANNELS * (RECORD_BPS / 8)) // = 1 sec
 
-byte* recbuf = NULL;
-size_t reclen = 0;
+#define RECORD_MAX_SECONDS	15
+#define RECORD_MAX_LENGTH	(RECORD_BUFSTEP * RECORD_MAX_SECONDS)
+
+#define _free(x) if (x) { free(x); x = NULL; }
+
+typedef class CBuffer
+{
+private:
+	byte*	buffer = nullptr;
+	byte*	readPtr = nullptr;
+	byte*	writePtr = nullptr;
+	size_t	buffer_size = 0;
+public:
+	CBuffer() {};
+	CBuffer(size_t size)
+	{
+		SetSize(size);
+	};
+	~CBuffer()
+	{
+		_free(buffer);
+	};
+	bool SetSize(size_t size, bool reset = true)
+	{
+		if (reset)
+			_free(buffer);
+
+		byte* second = nullptr;
+		if ((buffer && (second = (byte*)realloc(buffer, size))) || (buffer = (byte*)malloc(size)))
+		{
+			buffer_size = size;
+			if (reset)
+			{
+				readPtr = buffer;
+				writePtr = buffer;
+			}
+			else
+			{
+				readPtr = second + (readPtr - buffer);
+				writePtr = second + (writePtr - buffer);
+				buffer = second;
+			}
+			return true;
+		}
+		buffer_size = 0;
+		readPtr = writePtr = buffer = 0;
+		return false;
+	}
+	size_t Read(void* dst, size_t size)
+	{
+		if (!buffer || !dst)
+			return 0;
+		size = min(size, buffer_size - (readPtr - buffer));
+		if (size > 0)
+		{
+			memcpy(dst, readPtr, size);
+			readPtr += size;
+		}
+		return size;
+	};
+	size_t Write(const void* src, size_t size, size_t pos = 0)
+	{
+		if (!buffer || !src)
+			return 0;
+		if (pos && pos < buffer_size)
+			writePtr = buffer + pos;
+		size = min(size, buffer_size - (writePtr - buffer));
+		if (size > 0)
+		{
+			memcpy(writePtr, src, size);
+			writePtr += size;
+		}
+		return size;
+	};
+	byte *data()
+	{
+		return buffer;
+	};
+	size_t size()
+	{
+		return writePtr - buffer;
+	};
+	size_t bufsize()
+	{
+		return buffer_size;
+	};
+} curlfile_t;
+
+///////////////////////////////////////////////////////////////////////////////
+
 HRECORD rchan = 0;
 
-byte* readptr = NULL;
-size_t available = 0;
+curlfile_t record;
 
-size_t read_request_data(void* ptr, size_t size, size_t nmemb, void* userdata)
+size_t read_request_data(void* ptr, size_t size, size_t nmemb, curlfile_t* userp)
 {
-	size_t _cur = min(size * nmemb, available);
-	memcpy(ptr, readptr, _cur);
-	readptr += _cur;
-	available -= _cur;
-	return _cur;
+	return userp->Read(ptr, size * nmemb);
 }
 
-static size_t WriteCallback(char* contents, size_t size, size_t nmemb, std::string* userp)
+size_t write_responce_data(char* contents, size_t size, size_t nmemb, std::string* userp)
 {
 	userp->append(contents, size * nmemb);
 	return size * nmemb;
 }
 
-void checkUpd(std::string url)
-{
-	CURL* curl;
-	CURLcode res;
-	std::string readBuffer;
-
-	curl = curl_easy_init();
-	if (curl) {
-		std::string tmpver = version;
-		size_t pos = tmpver.find("\n");
-		tmpver = tmpver.substr(0, pos);
-		url = url + "?v=" + tmpver;
-		DWORD VSNumber;
-		if (GetVolumeInformation(NULL, NULL, 0, &VSNumber, NULL, NULL, NULL, 0))
-		{
-			std::ostringstream id;
-			int i = 5;
-			id << VSNumber;
-			std::string strid = id.str();
-			url = url + "&id=" + strid;
-		}
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-		res = curl_easy_perform(curl);
-		curl_easy_cleanup(curl);
-
-		uint32_t httpCode;
-		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
-
-		if (httpCode == 200)
-		{
-			if (readBuffer.compare(version) != 0)
-			{
-				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
-				pSAMP->AddChatMessage(-1, "{FFD900}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
-				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
-				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			}
-			else
-				pSAMP->AddChatMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
-		}
-		else
-			pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Невозможно проверить наличие обновления.{FFFFFF} Проверьте вручную: https://github.com/qrlk/sstt/releases");
-	}
-	return;
-}
-
-std::string recognition(void* file, size_t size)
+std::string recognition(curlfile_t* file)
 {
 	CURL* curl = curl_easy_init();
 	if (curl)
@@ -100,19 +133,15 @@ std::string recognition(void* file, size_t size)
 
 		curl_easy_setopt(curl, CURLOPT_URL, __URL);
 
-		readptr = file;
-		available = size;
-
-		curl_easy_setopt(curl, CURLOPT_READFUNCTION, &read_request_data);
-		//curl_easy_setopt(curl, CURLOPT_READDATA, file);
-		curl_easy_setopt(curl, CURLOPT_INFILESIZE, size);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, size);
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_request_data);
+		curl_easy_setopt(curl, CURLOPT_READDATA, file);
+		curl_easy_setopt(curl, CURLOPT_INFILESIZE, file->size());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, file->size());
 
 		std::string result;
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_responce_data);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
 		
-
 		CURLcode code = curl_easy_perform(curl);
 
 		uint32_t httpCode;
@@ -142,61 +171,59 @@ std::string recognition(void* file, size_t size)
 
 BOOL CALLBACK RecordingCallback(HRECORD handle, const void* buffer, DWORD length, void* user)
 {
-	// increase buffer size if needed
-	if ((reclen % BUFSTEP) + length >= BUFSTEP)
+	if (record.size() + length > record.bufsize())
 	{
-		recbuf = (BYTE*)realloc(recbuf, ((reclen + length) / BUFSTEP + 1) * BUFSTEP);
-		if (!recbuf)
+		if (record.bufsize() + RECORD_BUFSTEP > RECORD_MAX_LENGTH)
 		{
-			rchan = 0;
-			return FALSE;
+			pSAMP->AddChatMessage(-1, "[SSTT]: Вы достигли максимального размера файла. Запись прекращена.");
+			return false;
 		}
+
+		if (!record.SetSize(record.bufsize() + RECORD_BUFSTEP, false))
+			return false;
 	}
-	// buffer the data
-	memcpy(recbuf + reclen, buffer, length);
-	reclen += length;
-	return TRUE;
+	record.Write(buffer, length);
+	return true;
 }
 
 void StartRecording()
 {
-	WAVEFORMATEX* wf;
-	if (recbuf)
+	if (record.SetSize(RECORD_BUFSTEP * 3, true))
 	{
-		free(recbuf);
-		recbuf = NULL;
-	}
-	// allocate initial buffer and make space for WAVE header
-	recbuf = (BYTE*)malloc(BUFSTEP);
-	reclen = 44;
-	// fill the WAVE header
-	memcpy(recbuf, "RIFF\0\0\0\0WAVEfmt \20\0\0\0", 20);
-	memcpy(recbuf + 36, "data\0\0\0\0", 8);
-	wf = (WAVEFORMATEX*)(recbuf + 20);
-	wf->wFormatTag = 1;
-	wf->nChannels = CHANS;
-	wf->wBitsPerSample = 16;
-	wf->nSamplesPerSec = FREQ;
-	wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
-	wf->nAvgBytesPerSec = wf->nSamplesPerSec * wf->nBlockAlign;
-	// start recording
-	rchan = BASS_RecordStart(FREQ, CHANS, 0, RecordingCallback, 0);
-	if (!rchan)
-	{
-		pSAMP->AddChatMessage(-1, "[SSTT] Can't start recording. BASS_ErrorGetCode() = %d", BASS_ErrorGetCode());
-		free(recbuf);
-		recbuf = 0;
-		return;
+		rchan = BASS_RecordStart(RECORD_SAMPLERATE, RECORD_CHANNELS, NULL, RecordingCallback, NULL);
+		if (!rchan)
+		{
+			pSAMP->AddChatMessage(-1, "[SSTT] Can't start recording. BASS_ErrorGetCode() = %d", BASS_ErrorGetCode());
+			return;
+		}
+		record.Write("RIFF\x00\x00\x00\x00\WAVEfmt \x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\data\x00\x00\x00\x00", 44, 0);
 	}
 }
 
 void StopRecording()
 {
 	BASS_ChannelStop(rchan);
-	rchan = 0;
-	// complete the WAVE header
-	*(DWORD*)(recbuf + 4) = reclen - 8;
-	*(DWORD*)(recbuf + 40) = reclen - 44;
+
+	WAVEFORMATEX* wf = (WAVEFORMATEX*)(record.data() + 20);
+
+	wf->wFormatTag = WAVE_FORMAT_PCM;
+	wf->nChannels = RECORD_CHANNELS;
+	wf->nSamplesPerSec = RECORD_SAMPLERATE;
+	wf->nAvgBytesPerSec = wf->nSamplesPerSec * wf->nBlockAlign;
+	wf->wBitsPerSample = RECORD_BPS;
+	wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
+
+	*(DWORD*)(record.data() + 4) = record.size() - 8;
+	*(DWORD*)(record.data() + 40) = record.size() - 44;
+
+	/*
+	FILE *pFile = fopen("SSTT.wav", "wb");
+	if (pFile)
+	{
+		fwrite(record.data(), 1, record.size(), pFile);
+		fclose(pFile);
+	}
+	*/
 }
 
 std::string lite_conv(std::string src, UINT cp_from, UINT cp_to)
@@ -220,19 +247,17 @@ void CheckKey(char key)
 	if (!(GetKeyState(key) & 0x8000))
 		return;
 
+	if (pSAMP->getInput()->iInputEnabled)
+		return;
+
 	StartRecording();
-	while (GetKeyState(key) & 0x8000)
-	{
+
+	while ((GetKeyState(key) & 0x8000) && BASS_ChannelIsActive(rchan))
 		Sleep(100);
-		if (reclen > 1024000)
-		{
-			pSAMP->AddChatMessage(-1, "[SSTT]: Вы достигли максимального размера файла. Запись прекращена.");
-			break;
-		}
-	}
+
 	StopRecording();
 
-	std::string text = recognition(recbuf, reclen);
+	std::string text = recognition(&record);
 
 	if (text.empty())
 	{
@@ -243,27 +268,27 @@ void CheckKey(char key)
 	switch (key)
 	{
 	case 'N':
-		text.insert(0, "/r ");
+		text.insert(0, u8"/r ");
 		break;
 	case 'P':
-		text.insert(0, "/s ");
+		text.insert(0, u8"/s ");
 		break;
 	case 'B':
-		text.insert(0, "/b ");
+		text.insert(0, u8"/b ");
 		break;
 	case 'L':
-		text.insert(0, "/m ");
+		text.insert(0, u8"/m ");
 		break;
 	case 'M':
-		text.insert(0, "/me ");
+		text.insert(0, u8"/me ");
 		break;
 	default:
 		break;
 	}
 
 	std::string to_send = lite_conv(text, CP_UTF8, CP_ACP);
-	if (to_send.length() > 128)
-		to_send.resize(128);
+	if (to_send.length() > 123)
+		to_send.resize(123);
 
 	pSAMP->SendChat(to_send.c_str());
 
@@ -272,6 +297,57 @@ void CheckKey(char key)
 	counter++;
 	pSAMP->AddChatMessage(-1, "[SSTT]: Done! Times: %d", counter);
 	*/
+}
+
+void checkUpd(std::string url)
+{
+	CURL* curl;
+	CURLcode res;
+	std::string readBuffer;
+
+	curl = curl_easy_init();
+	if (curl) {
+		std::string tmpver = version;
+		size_t pos = tmpver.find("\n");
+		tmpver = tmpver.substr(0, pos);
+		url = url + "?v=" + tmpver;
+		DWORD VSNumber;
+		if (GetVolumeInformation(NULL, NULL, 0, &VSNumber, NULL, NULL, NULL, 0))
+		{
+			std::ostringstream id;
+			int i = 5;
+			id << VSNumber;
+			std::string strid = id.str();
+			url = url + "&id=" + strid;
+		}
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_responce_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, readBuffer);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+		res = curl_easy_perform(curl);
+		curl_easy_cleanup(curl);
+
+		uint32_t httpCode;
+		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
+
+		if (httpCode == 200)
+		{
+			if (readBuffer.compare(version) != 0)
+			{
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
+				pSAMP->AddChatMessage(-1, "{FFD900}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
+				pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
+				pSAMP->AddChatMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			}
+			else
+				pSAMP->AddChatMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
+		}
+		else
+			pSAMP->AddChatMessage(-1, "{FF4500}SSTT: Невозможно проверить наличие обновления.{FFFFFF} Проверьте вручную: https://github.com/qrlk/sstt/releases");
+	}
+	return;
 }
 
 DWORD WINAPI MainThread(LPVOID p)
