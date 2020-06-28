@@ -101,17 +101,22 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HRECORD rchan = 0;
-
+HRECORD rchan;
 curlfile_t record;
 
 size_t read_request_data(void* ptr, size_t size, size_t nmemb, curlfile_t* userp)
 {
+	if (userp == nullptr)
+		return 0;
+
 	return userp->Read(ptr, size * nmemb);
 }
 
 size_t write_responce_data(char* contents, size_t size, size_t nmemb, std::string* userp)
 {
+	if (userp == nullptr)
+		return 0;
+
 	userp->append(contents, size * nmemb);
 	return size * nmemb;
 }
@@ -127,8 +132,8 @@ std::string recognition(curlfile_t* file)
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-		struct curl_slist* headers = NULL;
-		headers = curl_slist_append(headers, "Content-Type: audio/x-wav");
+		curl_slist* headers = curl_slist_append(NULL, "Content-Type: audio/x-wav");
+
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
 		curl_easy_setopt(curl, CURLOPT_URL, __URL);
@@ -147,6 +152,9 @@ std::string recognition(curlfile_t* file)
 		uint32_t httpCode;
 		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
 
+		curl_easy_cleanup(curl);
+		curl_slist_free_all(headers);
+
 		std::string str3;
 
 		if (httpCode == 200)
@@ -156,15 +164,14 @@ std::string recognition(curlfile_t* file)
 				str3 = result.substr(result.find("<variant confidence=\"0\">"));
 				str3 = str3.substr(24);
 				str3 = str3.substr(0, str3.find("<"));
+				return str3;
 			}
 		}
 		else
 		{
 			pSAMP->AddChatMessage(-1, "[SSTT]: Непредвиденная ошибка сетевого характера :(");
 		}
-		curl_free(headers);
-		curl_easy_cleanup(curl);
-		return str3;
+
 	}
 	return std::string();
 }
@@ -364,6 +371,13 @@ DWORD WINAPI MainThread(LPVOID p)
 	if (!BASS_RecordInit(-1) && BASS_ErrorGetCode() != BASS_ERROR_ALREADY)
 	{
 		pSAMP->AddChatMessage(-1, "[SSTT] Ошибка инициализации. Микрофон не найден.");
+		ExitThread(0);
+	}
+
+	CURLcode code = curl_global_init(CURL_GLOBAL_ALL);
+	if (code != CURLE_OK)
+	{
+		pSAMP->AddChatMessage(0xFFAA4040, "CURL ERROR: %s", curl_easy_strerror(code));
 		ExitThread(0);
 	}
 
