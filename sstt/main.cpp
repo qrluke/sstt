@@ -175,9 +175,67 @@ size_t write_responce_data(char* contents, size_t size, size_t nmemb, std::strin
 	return size * nmemb;
 }
 
-std::string recognition(curlfile_t *file)
+static size_t WriteCallback(char* contents, size_t size, size_t nmemb, std::string* userp)
 {
-	CURL * curl = curl_easy_init();
+	userp->append(contents, size * nmemb);
+	return size * nmemb;
+}
+
+
+void checkUpd(std::string url)
+{
+	CURL* curl;
+	CURLcode res;
+	std::string readBuffer;
+
+	curl = curl_easy_init();
+	if (curl) {
+		std::string tmpver = version;
+		size_t pos = tmpver.find("\n");
+		tmpver = tmpver.substr(0, pos);
+		url = url + "?v=" + tmpver;
+		DWORD VSNumber;
+		if (GetVolumeInformation(NULL, NULL, 0, &VSNumber, NULL, NULL, NULL, 0))
+		{
+			std::ostringstream id;
+			int i = 5;
+			id << VSNumber;
+			std::string strid = id.str();
+			url = url + "&id=" + strid;
+		}
+		curl_easy_setopt(curl, CURLOPT_URL, url);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+		res = curl_easy_perform(curl);
+		curl_easy_cleanup(curl);
+
+		uint32_t httpCode;
+		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
+
+		if (httpCode == 200)
+		{
+			if (readBuffer.compare(version) != 0)
+			{
+				sampAddMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				sampAddMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
+				sampAddMessage(-1, "{FFD900}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
+				sampAddMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
+				sampAddMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			}
+			else
+				sampAddMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
+		}
+		else
+			sampAddMessage(-1, "{FF4500}SSTT: Невозможно проверить наличие обновления.{FFFFFF} Проверьте вручную: https://github.com/qrlk/sstt/releases");
+	}
+	return;
+}
+
+std::string recognition(curlfile_t* file)
+{
+	CURL* curl = curl_easy_init();
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_POST, TRUE);
@@ -356,65 +414,8 @@ void CheckKey(const char key)
 		to_send.resize(128);
 
 	time_to_send = true;
-
-	/*
-	static int counter = 0;
-	counter++;
-	sampAddMessage(-1, "[SSTT]: Done! Times: %d", counter);
-	*/
 }
 
-void checkUpd(std::string url)
-{
-	CURL *curl;
-	CURLcode res;
-	std::string readBuffer;
-
-	curl = curl_easy_init();
-	if (curl)
-	{
-		std::string tmpver = version;
-		size_t pos = tmpver.find("\n");
-		tmpver = tmpver.substr(0, pos);
-		url = url + "?v=" + tmpver;
-		DWORD VSNumber;
-		if (GetVolumeInformation(NULL, NULL, 0, &VSNumber, NULL, NULL, NULL, 0))
-		{
-			std::ostringstream id;
-			int i = 5;
-			id << VSNumber;
-			std::string strid = id.str();
-			url = url + "&id=" + strid;
-		}
-		curl_easy_setopt(curl, CURLOPT_URL, url);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_responce_data);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, readBuffer);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-		res = curl_easy_perform(curl);
-		curl_easy_cleanup(curl);
-
-		uint32_t httpCode;
-		curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &httpCode);
-
-		if (httpCode == 200)
-		{
-			if (readBuffer.compare(version) != 0)
-			{
-				sampAddMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{FFFFFF}SAMP SPEECH-TO-TEXT{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-				sampAddMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Прямая ссылка на скачивание:{FFFFFF}  https://qrlk.me/sstt");
-				sampAddMessage(-1, "{FFD900}Скачайте архив по ссылке, разархивируйте его содержимое в папку игры с заменой.");
-				sampAddMessage(-1, "{FF4500}SSTT: Обнаружено обновление!{FFD900} Подробная информация:{FFFFFF} https://github.com/qrlk/sstt/releases");
-				sampAddMessage(-1, "{FF4500}~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			}
-			else
-				sampAddMessage(-1, "SSTT: {348cb2}Вы используете самую свежую версию! Приятной игры! {ffffff}GH: https://github.com/qrlk/sstt");
-		}
-		else
-			sampAddMessage(-1, "{FF4500}SSTT: Невозможно проверить наличие обновления.{FFFFFF} Проверьте вручную: https://github.com/qrlk/sstt/releases");
-	}
-	return;
-}
 
 DWORD WINAPI MainThread(LPVOID p)
 {
@@ -492,7 +493,7 @@ class sstt
 public:
 	sstt()
 	{
-		using Idle_t = void(__cdecl *)();
+		using Idle_t = void(__cdecl*)();
 		Idle_t Idle = reinterpret_cast<Idle_t>(0x53BEE0);
 
 		static hook game_loop_Idle_hook(Idle, game_loop_Idle);
