@@ -475,10 +475,10 @@ void foo()
 		{
 			static int counter = 0;
 			counter++;
-			sampSendChat("Result: " + to_send);
-			this_coro::wait(50ms);
-			sampAddMessage(-1, "message sent. Times: " + std::to_string(counter));
-			//time_to_send = false;
+			sampSendChat(to_send);
+			/*this_coro::wait(50ms);
+			sampAddMessage(-1, "message sent. Times: " + std::to_string(counter));*/
+			time_to_send = false;
 		}
 	}
 }
