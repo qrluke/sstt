@@ -9,26 +9,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sampapi", "sstt\libs\SAMP-A
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-		GTASA Release|x86 = GTASA Release|x86
-		GTASA zDebug|x86 = GTASA zDebug|x86
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.Debug|x86.ActiveCfg = GTASA zDebug|Win32
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.Debug|x86.Build.0 = GTASA zDebug|Win32
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.GTASA Release|x86.ActiveCfg = GTASA Release|Win32
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.GTASA Release|x86.Build.0 = GTASA Release|Win32
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.GTASA zDebug|x86.ActiveCfg = GTASA zDebug|Win32
-		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.GTASA zDebug|x86.Build.0 = GTASA zDebug|Win32
 		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.Release|x86.ActiveCfg = GTASA Release|Win32
 		{B212DDA4-2A8E-45B2-914D-7BEEB31D06B1}.Release|x86.Build.0 = GTASA Release|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.Debug|x86.ActiveCfg = Debug|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.Debug|x86.Build.0 = Debug|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.GTASA Release|x86.ActiveCfg = Release|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.GTASA Release|x86.Build.0 = Release|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.GTASA zDebug|x86.ActiveCfg = Debug|Win32
-		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.GTASA zDebug|x86.Build.0 = Debug|Win32
 		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.Release|x86.ActiveCfg = Release|Win32
 		{A5CCA13E-440F-4CE4-9F7B-09DDDA09C329}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
