@@ -457,7 +457,10 @@ DWORD WINAPI MainThread(LPVOID p)
 void foo()
 {
 	using namespace std::chrono_literals;
-	this_coro::wait(5s);
+	while (!pInput) {
+		this_coro::wait(100ms);
+	}
+	this_coro::wait(500ms);
 
 	CreateThread(NULL, 0, MainThread, NULL, NULL, NULL);
 
