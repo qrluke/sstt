@@ -14,14 +14,14 @@
 
 using namespace sampapi::v037r1;
 
-CInput *&pInput = RefInputBox();
+CInput*& pInput = RefInputBox();
 
 std::string to_send;
 bool time_to_send = false;
 
 #include <windows.h>
 
-class SAMP *pSAMP;
+class SAMP* pSAMP;
 
 #define version "02.07.2020\n\n"
 
@@ -42,14 +42,14 @@ class SAMP *pSAMP;
 		x = NULL; \
 	}
 
-void sampSendChat(const std::string &text)
+void sampSendChat(const std::string& text)
 {
-	typedef int(__stdcall * SendCommand)(const char *);
-	typedef int(__stdcall * SendText)(const char *);
+	typedef int(__stdcall* SendCommand)(const char*);
+	typedef int(__stdcall* SendText)(const char*);
 	static SendCommand sendCommand = (SendCommand)((DWORD)GetModuleHandle("samp.dll") + 0x65C60);
 	static SendText sendText = (SendText)((DWORD)GetModuleHandle("samp.dll") + 0x57F0);
 
-	char *cstr = new char[text.length() + 1];
+	char* cstr = new char[text.length() + 1];
 	std::strcpy(cstr, text.c_str());
 
 	if (text[0] == '/')
@@ -59,25 +59,25 @@ void sampSendChat(const std::string &text)
 	delete[] cstr;
 }
 
-void sampAddMessage(int color, const std::string &string)
+void sampAddMessage(int color, const std::string& string)
 {
-	typedef int(__thiscall * AddMessage)(DWORD, int, const char *, int, int, int);
+	typedef int(__thiscall* AddMessage)(DWORD, int, const char*, int, int, int);
 	static AddMessage addMessage = (AddMessage)((DWORD)GetModuleHandle("samp.dll") + 0x64010);
 	static DWORD chatPointer = (DWORD)GetModuleHandle("samp.dll") + 0x21A0E4;
 
-	addMessage(*(DWORD *)chatPointer, 4, string.c_str(), 0, color, 0);
+	addMessage(*(DWORD*)chatPointer, 4, string.c_str(), 0, color, 0);
 }
 
 typedef class CBuffer
 {
 private:
-	byte *buffer = nullptr;
-	byte *readPtr = nullptr;
-	byte *writePtr = nullptr;
+	byte* buffer = nullptr;
+	byte* readPtr = nullptr;
+	byte* writePtr = nullptr;
 	size_t buffer_size = 0;
 
 public:
-	CBuffer(){};
+	CBuffer() {};
 	CBuffer(size_t size)
 	{
 		SetSize(size);
@@ -91,8 +91,8 @@ public:
 		if (reset)
 			_free(buffer);
 
-		byte *second = nullptr;
-		if ((buffer && (second = (byte *)realloc(buffer, size))) || (buffer = (byte *)malloc(size)))
+		byte* second = nullptr;
+		if ((buffer && (second = (byte*)realloc(buffer, size))) || (buffer = (byte*)malloc(size)))
 		{
 			buffer_size = size;
 			if (reset)
@@ -112,7 +112,7 @@ public:
 		readPtr = writePtr = buffer = 0;
 		return false;
 	}
-	size_t Read(void *dst, size_t size)
+	size_t Read(void* dst, size_t size)
 	{
 		if (!buffer || !dst)
 			return 0;
@@ -124,7 +124,7 @@ public:
 		}
 		return size;
 	};
-	size_t Write(const void *src, size_t size, size_t pos = 0)
+	size_t Write(const void* src, size_t size, size_t pos = 0)
 	{
 		if (!buffer || !src)
 			return 0;
@@ -138,7 +138,7 @@ public:
 		}
 		return size;
 	};
-	byte *data()
+	byte* data()
 	{
 		return buffer;
 	};
@@ -157,7 +157,8 @@ public:
 HRECORD rchan;
 curlfile_t record;
 
-size_t read_request_data(void *ptr, size_t size, size_t nmemb, curlfile_t *userp)
+
+size_t read_request_data(void* ptr, size_t size, size_t nmemb, curlfile_t* userp)
 {
 	if (userp == nullptr)
 		return 0;
@@ -165,7 +166,7 @@ size_t read_request_data(void *ptr, size_t size, size_t nmemb, curlfile_t *userp
 	return userp->Read(ptr, size * nmemb);
 }
 
-size_t write_responce_data(char *contents, size_t size, size_t nmemb, std::string *userp)
+size_t write_responce_data(char* contents, size_t size, size_t nmemb, std::string* userp)
 {
 	if (userp == nullptr)
 		return 0;
@@ -176,7 +177,7 @@ size_t write_responce_data(char *contents, size_t size, size_t nmemb, std::strin
 
 std::string recognition(curlfile_t *file)
 {
-	CURL *curl = curl_easy_init();
+	CURL * curl = curl_easy_init();
 	if (curl)
 	{
 		curl_easy_setopt(curl, CURLOPT_POST, TRUE);
@@ -185,7 +186,7 @@ std::string recognition(curlfile_t *file)
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-		curl_slist *headers = curl_slist_append(NULL, "Content-Type: audio/x-wav");
+		curl_slist* headers = curl_slist_append(NULL, "Content-Type: audio/x-wav");
 
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -228,7 +229,7 @@ std::string recognition(curlfile_t *file)
 	return std::string();
 }
 
-BOOL CALLBACK RecordingCallback(HRECORD handle, const void *buffer, DWORD length, void *user)
+BOOL CALLBACK RecordingCallback(HRECORD handle, const void* buffer, DWORD length, void* user)
 {
 	if (record.size() + length > record.bufsize())
 	{
@@ -263,7 +264,7 @@ void StopRecording()
 {
 	BASS_ChannelStop(rchan);
 
-	WAVEFORMATEX *wf = (WAVEFORMATEX *)(record.data() + 20);
+	WAVEFORMATEX* wf = (WAVEFORMATEX*)(record.data() + 20);
 
 	wf->wFormatTag = WAVE_FORMAT_PCM;
 	wf->nChannels = RECORD_CHANNELS;
@@ -272,8 +273,8 @@ void StopRecording()
 	wf->wBitsPerSample = RECORD_BPS;
 	wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
 
-	*(DWORD *)(record.data() + 4) = record.size() - 8;
-	*(DWORD *)(record.data() + 40) = record.size() - 44;
+	*(DWORD*)(record.data() + 4) = record.size() - 8;
+	*(DWORD*)(record.data() + 40) = record.size() - 44;
 
 	/*
 	FILE *pFile = fopen("SSTT.wav", "wb");
@@ -478,7 +479,7 @@ void foo()
 
 void game_loop_Idle()
 {
-	static coro_wait instance{foo};
+	static coro_wait instance{ foo };
 
 	instance.process();
 }
