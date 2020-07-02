@@ -437,9 +437,11 @@ DWORD WINAPI MainThread(LPVOID p)
 		ExitThread(0);
 	}
 
-	sampAddMessage(-1, "SSTT v42.60.0202 инициализирован. Держите клавишу, потом отпустите. Автор: {348cb2}em.klrq");
-	sampAddMessage(-1, "Клавиши: R - говорить, P - крикнуть, N - рация, M - /me, L - мегафон, B - /b");
-	//checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
+	std::string ver = version;
+
+	sampAddMessage(-1, "SSTT v" + ver + " инициализирован. Автор: {348cb2}qrlk{ffffff}. Спасибо: {cc0000}redcode{ffffff}, {ffa500}BlackKnigga{ffffff}, {17bb17}imring");
+	sampAddMessage(-1, "Держите клавишу, потом отпустите: R - говорить, P - крикнуть, N - рация, J - /me, L - мегафон, B - /b");
+	checkUpd("http://qrlk.me/dev/moonloader/sstt/stats.php");
 
 	while (true)
 	{
