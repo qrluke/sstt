@@ -343,7 +343,7 @@ void CheckKey(const char key)
 	case 'L':
 		text.insert(0, "/m ");
 		break;
-	case 'M':
+	case 'J':
 		text.insert(0, "/me ");
 		break;
 	default:
@@ -446,7 +446,7 @@ DWORD WINAPI MainThread(LPVOID p)
 		CheckKey('N');
 		CheckKey('B');
 		CheckKey('L');
-		CheckKey('M');
+		CheckKey('J');
 
 		Sleep(10);
 	}
