@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="libs\coro_wait\coro_wait.cpp">
+      <Filter>libs\coro_wait</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\Yet-another-hook-library\hde32\src\hde32.cpp">
+      <Filter>libs\Yet-another-hook-library\hde32\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="libs">
+      <UniqueIdentifier>{e59c8a72-cac0-4440-9fa7-4e4a40a6466a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\audio">
+      <UniqueIdentifier>{67b018d9-21e7-43a3-aa6c-57c6c03cdd29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\coro_wait">
+      <UniqueIdentifier>{49298287-d801-4797-a7d3-e36a1dd98865}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\Yet-another-hook-library">
+      <UniqueIdentifier>{e9dfb0b7-3371-48a3-b15b-b23e93ee66d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\Yet-another-hook-library\xbyak">
+      <UniqueIdentifier>{4b89e3f4-af25-4715-8cbc-1f9ad06ef33f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\Yet-another-hook-library\hde32">
+      <UniqueIdentifier>{b96714c6-caf0-47a6-98b2-cc0991737364}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\Yet-another-hook-library\hde32\include">
+      <UniqueIdentifier>{22abdf7d-01d1-4257-9307-0067265a366c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\Yet-another-hook-library\hde32\src">
+      <UniqueIdentifier>{3978116e-9ada-43c7-8ff8-3c4936d3809b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\audio\bass.h">
+      <Filter>libs\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\coro_wait\coro_wait.h">
+      <Filter>libs\coro_wait</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\hde32\include\table32.h">
+      <Filter>libs\Yet-another-hook-library\hde32\include</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\hde32\include\hde32.h">
+      <Filter>libs\Yet-another-hook-library\hde32\include</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\xbyak\xbyak_util.h">
+      <Filter>libs\Yet-another-hook-library\xbyak</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\xbyak\xbyak.h">
+      <Filter>libs\Yet-another-hook-library\xbyak</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\xbyak\xbyak_bin2hex.h">
+      <Filter>libs\Yet-another-hook-library\xbyak</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\xbyak\xbyak_mnemonic.h">
+      <Filter>libs\Yet-another-hook-library\xbyak</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\hook.h">
+      <Filter>libs\Yet-another-hook-library</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\Yet-another-hook-library\hook_function_traits.hpp">
+      <Filter>libs\Yet-another-hook-library</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+[submodule "sstt/libs/coro_wait"]
+	path = sstt/libs/coro_wait
+	url = https://github.com/BlackKnigga/coro_wait
+[submodule "sstt/libs/Yet-another-hook-library"]
+	path = sstt/libs/Yet-another-hook-library
+	url = https://github.com/BlackKnigga/Yet-another-hook-library
+[submodule "sstt/libs/SAMP-API"]
+	path = sstt/libs/SAMP-API
+	url = https://github.com/BlastHackNet/SAMP-API
