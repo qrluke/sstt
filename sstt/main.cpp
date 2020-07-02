@@ -309,6 +309,11 @@ void CheckKey(const char key)
 	if (pInput->m_bEnabled)
 		return;
 
+	Sleep(250);
+
+	if (!(GetKeyState(key) & 0x8000))
+		return;
+
 	StartRecording();
 
 	while ((GetKeyState(key) & 0x8000) && BASS_ChannelIsActive(rchan))
