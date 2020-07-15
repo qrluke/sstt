@@ -8,6 +8,18 @@
     <ClCompile Include="libs\Yet-another-hook-library\hde32\src\hde32.cpp">
       <Filter>libs\Yet-another-hook-library\hde32\src</Filter>
     </ClCompile>
+    <ClCompile Include="libs\DX9Hook\imgui_demo.cpp">
+      <Filter>libs\DX9Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\DX9Hook\imgui_draw.cpp">
+      <Filter>libs\DX9Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\DX9Hook\imgui_impl_dx9.cpp">
+      <Filter>libs\DX9Hook</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\DX9Hook\imgui.cpp">
+      <Filter>libs\DX9Hook</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="libs">
@@ -33,6 +45,9 @@
     </Filter>
     <Filter Include="libs\Yet-another-hook-library\hde32\src">
       <UniqueIdentifier>{3978116e-9ada-43c7-8ff8-3c4936d3809b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs\DX9Hook">
+      <UniqueIdentifier>{b0dc8df8-3baf-4225-b7a3-6e8317363b40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +80,33 @@
     </ClInclude>
     <ClInclude Include="libs\Yet-another-hook-library\hook_function_traits.hpp">
       <Filter>libs\Yet-another-hook-library</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\imgui.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\imgui_impl_dx9.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\imgui_internal.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\stb_rect_pack.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\stb_textedit.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\stb_truetype.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\vtable.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\DX9Hook\imconfig.h">
+      <Filter>libs\DX9Hook</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\json.hpp">
+      <Filter>libs</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

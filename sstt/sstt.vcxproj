@@ -63,12 +63,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\coro_wait\coro_wait.cpp" />
+    <ClCompile Include="libs\DX9Hook\imgui.cpp" />
+    <ClCompile Include="libs\DX9Hook\imgui_demo.cpp" />
+    <ClCompile Include="libs\DX9Hook\imgui_draw.cpp" />
+    <ClCompile Include="libs\DX9Hook\imgui_impl_dx9.cpp" />
     <ClCompile Include="libs\Yet-another-hook-library\hde32\src\hde32.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\audio\bass.h" />
     <ClInclude Include="libs\coro_wait\coro_wait.h" />
+    <ClInclude Include="libs\DX9Hook\imconfig.h" />
+    <ClInclude Include="libs\DX9Hook\imgui.h" />
+    <ClInclude Include="libs\DX9Hook\imgui_impl_dx9.h" />
+    <ClInclude Include="libs\DX9Hook\imgui_internal.h" />
+    <ClInclude Include="libs\DX9Hook\stb_rect_pack.h" />
+    <ClInclude Include="libs\DX9Hook\stb_textedit.h" />
+    <ClInclude Include="libs\DX9Hook\stb_truetype.h" />
+    <ClInclude Include="libs\DX9Hook\vtable.h" />
+    <ClInclude Include="libs\json.hpp" />
     <ClInclude Include="libs\Yet-another-hook-library\hde32\include\hde32.h" />
     <ClInclude Include="libs\Yet-another-hook-library\hde32\include\table32.h" />
     <ClInclude Include="libs\Yet-another-hook-library\hook.h" />
