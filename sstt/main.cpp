@@ -39,7 +39,7 @@ static float stats_array[] = { 0, 0, 0, 0, 0, 0, 0 };
 
 class SAMP* pSAMP;
 
-#define version "02.07.2020"
+#define version "15.07.2020"
 
 
 #define RECORD_SAMPLERATE 48000
