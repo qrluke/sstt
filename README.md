@@ -18,7 +18,7 @@
 
 </p>
 
-**Samp Speech-To-Text** is an **ASI plugin** that introduces voice input to **[gta samp](https://sa-mp.com/)**.
+**SA:MP Speech-To-Text** is an **ASI plugin** that introduces voice input to **[gta samp](https://sa-mp.com/)**.
 
 Recognizes only Russian, although you can change the backend url manually as you want (in code, not in json).
 
@@ -28,7 +28,7 @@ It requires **[SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe)** 
 
 **The following description is in Russian, because it is the main language of the user base**.
 
-# SSTT - Samp Speech-To-Text
+# SSTT - SA:MP Speech-To-Text
 
 **Описание:** Простой ASI плагин, который записывает по **удержанию клавиши** звук с микрофона, сохраняет в wav, распознаёт через инфраструктуру Яндекса и возвращает результат прямо в чат сампа.  
 
