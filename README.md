@@ -1,11 +1,89 @@
- # SSTT - Samp Speech-To-Text
+<h1 align="center">SSTT</h1>
+
+<p align="center">
+
+<img src="https://img.shields.io/badge/made%20for-GTA%20SA--MP-blue" >
+
+<img src="https://img.shields.io/badge/SA--MP-0.3.7--R1-blue" >
+
+<img src="https://img.shields.io/badge/Server-Any-red">
+
+<img src="https://img.shields.io/github/languages/top/qrlk/sstt">
+
+<img src="https://img.shields.io/badge/dynamic/json?color=blueviolet&label=users%20%28active%29&query=result&url=http%3A%2F%2Fqrlk.me%2Fdev%2Fmoonloader%2Fusers_active.php%3Fscript%3Dsstt">
+
+<img src="https://img.shields.io/badge/dynamic/json?color=blueviolet&label=users%20%28all%20time%29&query=result&url=http%3A%2F%2Fqrlk.me%2Fdev%2Fmoonloader%2Fusers_all.php%3Fscript%3Dsstt">
+
+<img src="https://img.shields.io/github/downloads/qrlk/sstt/total">
+
+</p>
+
+**Samp Speech-To-Text** is an **ASI plugin** that introduces voice input in **[gta samp](https://sa-mp.com/)**.
+
+Recognizes only Russian, although you can change the backend url manually as you want (in code, not in json).
+
+It requires [SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe) and [ASI Loader](https://www.gtagarage.com/mods/show.php?id=21709), depends on bass.dll, libcurl.dll и zlib1.dll (all included in release archive).
+
+---
+
+**The following description is in Russian, because it is the main language of the user base**.
+
+# SSTT - Samp Speech-To-Text
 
 **Описание:** Простой ASI плагин, который записывает по **удержанию клавиши** звук с микрофона, сохраняет в wav, распознаёт через инфраструктуру Яндекса и возвращает результат прямо в чат сампа.  
-В/на Украине не будет работать без VPN.  
+
+P.S. Для пользователей из Украины нужен VPN.  
 
 **Видео:**  
-[![](http://img.youtube.com/vi/5SnM3AYhINk/0.jpg)](http://www.youtube.com/watch?v=5SnM3AYhINk "")  
+[![](http://img.youtube.com/vi/5SnM3AYhINk/0.jpg)](http://www.youtube.com/watch?v=5SnM3AYhINk "") 
 
-**Горячие клавиши:** R - говорить, P - /s [текст], N - /r [текст], M - /me [текст], L - /m [текст], B - /b [текст]
+P.S. Осторожно, в видео присутствует RolePlay образца 2020 года.
+
+
+**Горячие клавиши:** R - говорить, P - /s [текст], N - /r [текст], J - /me [текст], L - /m [текст], B - /b [текст]
 
 **Требования:** [SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe) и [ASI Loader](https://www.gtagarage.com/mods/show.php?id=21709). А так же библиотеки bass.dll, libcurl.dll и zlib1.dll (две последние есть в архиве релиза).
+
+# Настройка горячих клавиш
+В [версии от 15.07.2020](https://github.com/qrlk/sstt/releases/tag/v5%2C0) была добавлена возможность настроить свой набор фраз.  
+Для этого нужно выйти из игры и отредактировать файл sstt.json:
+```json
+{
+    "backend": 1,
+    "header": "Content-Type: audio/x-wav",
+    "presets": {
+        "/b": {
+            "key": "B",
+            "text": "/b "
+        },
+        "/m": {
+            "key": "L",
+            "text": "/m "
+        },
+        "/me": {
+            "key": "J",
+            "text": "/me "
+        },
+        "/r": {
+            "key": "N",
+            "text": "/r "
+        },
+        "/s": {
+            "key": "P",
+            "text": "/s "
+        },
+        "prosto v chat": {
+            "key": "R",
+            "text": ""
+        }
+    },
+    "url": "http://asr.yandex.net/asr_xml?uuid=12345678123456781234546112345678&disableAntimat=true&topic=general&lang=ru-RU&key=6372dda5-9674-4413-85ff-e9d0eb2f99a7"
+}
+```
+Сейчас работает только смена пресетов по такому шаблону:
+```json
+"nazvanie shablona": {
+    "key": "Odna Knopka",
+    "text": "Prefix v chat"
+}
+```
