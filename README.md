@@ -34,11 +34,7 @@ It requires [SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe) and 
 
 P.S. Для пользователей из Украины нужен VPN.  
 
-**Видео:**  
-[![](http://img.youtube.com/vi/5SnM3AYhINk/0.jpg)](http://www.youtube.com/watch?v=5SnM3AYhINk "") 
-
-P.S. Осторожно, в видео присутствует RolePlay образца 2020 года.
-
+![](https://i.imgur.com/8gTul0K.png)
 
 **Горячие клавиши:** R - говорить, P - /s [текст], N - /r [текст], J - /me [текст], L - /m [текст], B - /b [текст]
 
@@ -87,3 +83,7 @@ P.S. Осторожно, в видео присутствует RolePlay обр�
     "text": "Prefix v chat"
 }
 ```
+
+## Ссылки
+* [Тема на blasthack](https://blast.hk/threads/56447/)
+* [Авторский обзор](http://www.youtube.com/watch?v=5SnM3AYhINk)
