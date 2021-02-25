@@ -22,7 +22,7 @@
 
 Recognizes only Russian, although you can change the backend url manually as you want (in code, not in json).
 
-It requires **[SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe)** and **[ASI Loader](https://www.gtagarage.com/mods/show.php?id=21709)**, depends on bass.dll, libcurl.dll и zlib1.dll (all included in the release).
+It requires **[SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe)** and **[ASI Loader](https://www.gtagarage.com/mods/show.php?id=21709)**, depends on bass.dll, libcurl.dll и zlib1.dll (all included in [the release](https://github.com/qrlk/sstt/releases/latest)).
 
 ---
 
