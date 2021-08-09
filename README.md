@@ -27,7 +27,9 @@ It requires **[SAMP 0.3.7-R1](http://files.sa-mp.com/sa-mp-0.3.7-install.exe)** 
 ---
 
 **The following description is in Russian, because it is the main language of the user base**.
-
+<details>
+  <summary>Описание на русском языке.</summary>
+    
 # SSTT - SA:MP Speech-To-Text
 
 **Описание:** Простой ASI плагин, который записывает по **удержанию клавиши** звук с микрофона, сохраняет в wav, распознаёт через инфраструктуру Яндекса и возвращает результат прямо в чат сампа.  
@@ -86,3 +88,4 @@ P.S. Для пользователей из Украины нужен VPN.
 ## Ссылки
 * [Тема на blasthack](https://blast.hk/threads/56447/)
 * [Авторский обзор](http://www.youtube.com/watch?v=5SnM3AYhINk)
+</details>
